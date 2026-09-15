@@ -1163,42 +1163,41 @@ static void FileSelectFileCopyChooseBaseDestinationFile(void)
     FILE_SELECT_DATA.currentFile = file;
 }
 
-#ifdef NON_MATCHING
 static u32 FileSelectCopyFileHandler(void)
 {
-    // https://decomp.me/scratch/Rz4bp
-
     u32 ended;
     s32 action;
+    u8 subroutineStage;
     
     ended = FALSE;
 
-    FILE_SELECT_DATA.subMenuTimer++;
-
-    switch (FILE_SELECT_DATA.subMenuStage)
+    FILE_SELECT_DATA.subroutineTimer++;
+    
+    subroutineStage = FILE_SELECT_DATA.subroutineStage;
+    switch (subroutineStage)
     {
         case 0:
-            FileScreenUpdateMessageInfoIdQueue(0, 1);
-            FileScreenUpdateMessageInfoIdQueue(0, 2);
+            unk_790cc(0, 1);
+            unk_790cc(0, 2);
 
             FileSelectFindFirstNonEmptyFile(&FILE_SELECT_DATA.copySourceFile);
             FileSelectUpdateCopyCursor(CURSOR_COPY_POSE_DEFAULT, FILE_SELECT_DATA.copySourceFile);
             FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_SPAWN_INIT);
 
-            FILE_SELECT_DATA.fileSelectCursors.confirmCopy = sFileSelectMenuCursors_Empty.confirmCopy;
+            FILE_SELECT_DATA.fileSelectData.unk_0 = sFileSelectionData_Empty.unk_0;
             FILE_SELECT_DATA.unk_3A = 0;
 
-            FILE_SELECT_DATA.subMenuStage++;
+            FILE_SELECT_DATA.subroutineStage++;
             break;
 
         case 1:
             if (FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_SPAWN))
-                FILE_SELECT_DATA.subMenuStage++;
+                FILE_SELECT_DATA.subroutineStage++;
             break;
 
         case 2:
-            if (FileScreenUpdateMessageInfoIdQueue(1, 2))
-                FILE_SELECT_DATA.subMenuStage++;
+            if (unk_790cc(1, 2))
+                FILE_SELECT_DATA.subroutineStage++;
             break;
 
         case 3:
@@ -1212,8 +1211,7 @@ static u32 FileSelectCopyFileHandler(void)
                 }
                 else if (gChangedInput & KEY_B)
                 {
-                    FILE_SELECT_DATA.subMenuStage = 14;
-                    break;
+                    goto lbl_case_14;
                 }
                 else if (gChangedInput & KEY_A)
                 {
@@ -1235,9 +1233,9 @@ static u32 FileSelectCopyFileHandler(void)
                 
                 if (gSaveFilesInfo[FILE_SELECT_DATA.copySourceFile].timeAttack)
                 {
-                    SoundPlay(SOUND_REFUSE_MENU);
-                    FileScreenUpdateMessageInfoIdQueue(0, 4);
-                    FILE_SELECT_DATA.subMenuStage = 9;
+                    SoundPlay(0x209);
+                    unk_790cc(0, 4);
+                    FILE_SELECT_DATA.subroutineStage = 9;
                 }
                 else
                 {
@@ -1245,43 +1243,36 @@ static u32 FileSelectCopyFileHandler(void)
                     FileSelectFileCopyChooseBaseDestinationFile();
                     FileSelectUpdateCopyArrow(ARROW_COPY_POSE_DEFAULT, FILE_SELECT_DATA.currentFile);
                     FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_DESTINATION_SPAWN);
-                    FILE_SELECT_DATA.subMenuStage++;
+                    FILE_SELECT_DATA.subroutineStage++;
                 }
             }
             break;
 
         case 4:
             action = 0;
+
             if (gChangedInput)
             {
                 if (FileSelectApplyMenuSelectInput(FILE_SELECT_SELECTION_SET_ALL_FILES_NO_COPY, &FILE_SELECT_DATA.currentFile))
-                {
                     action = 1;
-                }
-                else
-                {
-                    if (!(gChangedInput & KEY_B))
-                    {
-                        if (gChangedInput & KEY_A)
-                            action = 2;
-
-                        if (action == 0)
-                            break;
-                    }
-                    else
-                    {
-                        SoundPlay(SOUND_REFUSE_MENU);
-                        FileSelectUpdateCopyCursor(CURSOR_COPY_POSE_DEFAULT, FILE_SELECT_DATA.copySourceFile);
-                        FileSelectUpdateCopyArrow(ARROW_COPY_POSE_KILL, FILE_SELECT_DATA.currentFile);
-    
-                        FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_DESTINATION_DESPAWN);
-                        FILE_SELECT_DATA.subMenuStage = 3;
-                        break;
-                    }
-                }
+                else if (gChangedInput & KEY_B)
+                    action = -1;
+                else if (gChangedInput & KEY_A)
+                    action = 2;
             }
-            else if (action == 0)
+
+            if (action == 0)
                 break;
+
+            if (action < 0)
+            {
+                SoundPlay(0x209);
+                FileSelectUpdateCopyCursor(CURSOR_COPY_POSE_DEFAULT, FILE_SELECT_DATA.copySourceFile);
+                FileSelectUpdateCopyArrow(ARROW_COPY_POSE_KILL, FILE_SELECT_DATA.currentFile);
+                FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_DESTINATION_DESPAWN);
+                FILE_SELECT_DATA.subroutineStage = 3;
+                break;
+            }
 
             if (action == 1)
             {
@@ -1290,20 +1281,20 @@ static u32 FileSelectCopyFileHandler(void)
             }
             else if (action == 2)
             {
-                FILE_SELECT_DATA.fileSelectCursors.confirmCopy = sFileSelectMenuCursors_Empty.confirmCopy;
+                FILE_SELECT_DATA.fileSelectData.unk_0 = sFileSelectionData_Empty.unk_0;
                 FileSelectUpdateCopyArrow(ARROW_COPY_POSE_COPYING, FILE_SELECT_DATA.currentFile);
 
                 if ((FILE_SELECT_DATA.enabledMenus >> FILE_SELECT_DATA.currentFile) & 1)
                 {
-                    FileScreenUpdateMessageInfoIdQueue(0, 3);
+                    unk_790cc(0, 3);
                     FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_OVERRIDE_SPAWN_INIT);
                     FileSelectPlayMenuSound(MENU_SOUND_REQUEST_COPY_DELETE);
-                    FILE_SELECT_DATA.subMenuStage = 5;
+                    FILE_SELECT_DATA.subroutineStage = 5;
                 }
                 else
                 {
                     FileSelectPlayMenuSound(MENU_SOUND_REQUEST_COPY_CONFIRM);
-                    FILE_SELECT_DATA.subMenuStage = 11;
+                    FILE_SELECT_DATA.subroutineStage = 11;
                 }
             }
             break;
@@ -1311,8 +1302,8 @@ static u32 FileSelectCopyFileHandler(void)
         case 5:
             if (FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_OVERRIDE_SPAWN))
             {
-                unk_7e3fc(4, FILE_SELECT_DATA.fileSelectCursors.confirmCopy);
-                FILE_SELECT_DATA.subMenuStage++;
+                unk_7e3fc(4, FILE_SELECT_DATA.fileSelectData.unk_0);
+                FILE_SELECT_DATA.subroutineStage++;
             }
             break;
 
@@ -1323,34 +1314,34 @@ static u32 FileSelectCopyFileHandler(void)
             {
                 if (gChangedInput & KEY_A)
                 {
-                    if (FILE_SELECT_DATA.fileSelectCursors.confirmCopy != 0)
-                        FILE_SELECT_DATA.subMenuStage = 7;
+                    if (FILE_SELECT_DATA.fileSelectData.unk_0 != 0)
+                        FILE_SELECT_DATA.subroutineStage = 7;
                     else
                     {
                         FileSelectPlayMenuSound(MENU_SOUND_REQUEST_COPY_CONFIRM);
                         action = 0x80;
-                        FILE_SELECT_DATA.subMenuStage = 11;
+                        FILE_SELECT_DATA.subroutineStage = 11;
                     }
                 }
                 else if (gChangedInput & KEY_B)
                 {
-                    FILE_SELECT_DATA.subMenuStage = 7;
+                    FILE_SELECT_DATA.subroutineStage = 7;
                 }
                 else if (gChangedInput & KEY_LEFT)
                 {
-                    if (FILE_SELECT_DATA.fileSelectCursors.confirmCopy != 0)
+                    if (FILE_SELECT_DATA.fileSelectData.unk_0 != 0)
                     {
                         action = 0;
-                        FILE_SELECT_DATA.fileSelectCursors.confirmCopy = 0;
+                        FILE_SELECT_DATA.fileSelectData.unk_0 = 0;
                         FileSelectPlayMenuSound(MENU_SOUND_REQUEST_SUB_MENU_CURSOR);
                     }
                 }
                 else if (gChangedInput & KEY_RIGHT)
                 {
-                    if (FILE_SELECT_DATA.fileSelectCursors.confirmCopy == 0)
+                    if (FILE_SELECT_DATA.fileSelectData.unk_0 == 0)
                     {
                         action = 1;
-                        FILE_SELECT_DATA.fileSelectCursors.confirmCopy = 1;
+                        FILE_SELECT_DATA.fileSelectData.unk_0 = 1;
                         FileSelectPlayMenuSound(MENU_SOUND_REQUEST_SUB_MENU_CURSOR);
                     }
                 }
@@ -1361,25 +1352,25 @@ static u32 FileSelectCopyFileHandler(void)
             break;
 
         case 7:
-            SoundPlay(SOUND_REFUSE_MENU);
+            SoundPlay(0x209);
             unk_7e3fc(4, 0x81);
             FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_OVERRIDE_DESPAWN_INIT);
-            FILE_SELECT_DATA.subMenuStage++;
+            FILE_SELECT_DATA.subroutineStage++;
             break;
 
         case 8:
             if (FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_OVERRIDE_DESPAWN))
             {
                 FileSelectUpdateCopyArrow(ARROW_COPY_POSE_DEFAULT, FILE_SELECT_DATA.currentFile);
-                FILE_SELECT_DATA.subMenuStage = 4;
+                FILE_SELECT_DATA.subroutineStage = 4;
             }
             break;
 
         case 9:
-            if (FileScreenUpdateMessageInfoIdQueue(1, 4))
+            if (unk_790cc(1, 4))
             {
-                FileSelectUpdateTilemap(TILEMAP_REQUEST_28);
-                FILE_SELECT_DATA.subMenuStage++;
+                FileSelectUpdateTilemap(0x1C);
+                FILE_SELECT_DATA.subroutineStage++;
             }
             break;
 
@@ -1388,7 +1379,7 @@ static u32 FileSelectCopyFileHandler(void)
             {
                 FileSelectUpdateCopyCursor(CURSOR_COPY_POSE_DEFAULT, FILE_SELECT_DATA.copySourceFile);
                 FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_DESTINATION_DESPAWN);
-                FILE_SELECT_DATA.subMenuStage = 3;
+                FILE_SELECT_DATA.subroutineStage = 3;
             }
             break;
 
@@ -1396,22 +1387,25 @@ static u32 FileSelectCopyFileHandler(void)
             if (SramCopyFile(FILE_SELECT_DATA.copySourceFile, FILE_SELECT_DATA.currentFile))
             {
                 FILE_SELECT_DATA.unk_3A = 1;
-                if (FILE_SELECT_DATA.fileSelectCursors.confirmCopy != 0)
-                    FILE_SELECT_DATA.subMenuStage = 14;
+                if (FILE_SELECT_DATA.fileSelectData.unk_0 != 0)
+                    FILE_SELECT_DATA.subroutineStage = 14;
                 else
-                    FILE_SELECT_DATA.subMenuStage = 12;
+                    FILE_SELECT_DATA.subroutineStage = 12;
             }
             break;
 
         case 12:
             unk_7e3fc(4, 0x81);
             FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_OVERRIDE_DESPAWN_INIT);
-            FILE_SELECT_DATA.subMenuStage++;
+            FILE_SELECT_DATA.subroutineStage++;
             break;
 
         case 13:
             if (FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_OVERRIDE_DESPAWN))
-                FILE_SELECT_DATA.subMenuStage = 14;
+            {
+                lbl_case_14:
+                FILE_SELECT_DATA.subroutineStage = 14;
+            }
             break;
 
         case 14:
@@ -1421,9 +1415,9 @@ static u32 FileSelectCopyFileHandler(void)
                 FileSelectDisplaySaveFileTimer(FILE_SELECT_DATA.currentFile);
                 FileSelectDisplaySaveFileMiscInfo(&gSaveFilesInfo[FILE_SELECT_DATA.currentFile], FILE_SELECT_DATA.currentFile);
 
-                FILE_SELECT_DATA.fileScreenOam[sFileSelectFileOamOffsets[FILE_SELECT_DATA.currentFile][1]].exists =
+                FILE_SELECT_DATA.fileScreenOam[sFileSelect_760b79[FILE_SELECT_DATA.currentFile][1]].exists =
                     gSaveFilesInfo[FILE_SELECT_DATA.currentFile].completedGame ? OAM_ID_CHANGED_FLAG : FALSE;
-            
+
                 FileScreenSetEnabledMenuFlags();
                 DmaTransfer(3, (void*)sEwramPointer + 0x800, VRAM_BASE + 0xD800, 0x800, 16);
             }
@@ -1432,13 +1426,13 @@ static u32 FileSelectCopyFileHandler(void)
             FileSelectUpdateCopyArrow(ARROW_COPY_POSE_KILL, FILE_SELECT_DATA.currentFile);
             
             FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_DESPAWN_INIT);
-            FILE_SELECT_DATA.subMenuStage++;
+            FILE_SELECT_DATA.subroutineStage++;
             break;
 
         case 15:
             if (FileSelectUpdateTilemap(TILEMAP_REQUEST_COPY_DESPAWN))
             {
-                FileScreenUpdateMessageInfoIdQueue(2, UCHAR_MAX);
+                unk_790cc(2, UCHAR_MAX);
                 ended = TRUE;
             }
             break;
@@ -1446,679 +1440,6 @@ static u32 FileSelectCopyFileHandler(void)
 
     return ended;
 }
-#else
-NAKED_FUNCTION
-static u32 FileSelectCopyFileHandler(void)
-{
-    asm(" \n\
-    push {r4, r5, r6, r7, lr} \n\
-    sub sp, #4 \n\
-    movs r7, #0 \n\
-    ldr r2, lbl_0807923c @ =sNonGameplayRamPointer \n\
-    ldr r1, [r2] \n\
-    add r3, r1, #0 \n\
-    add r3, #0x42 \n\
-    ldrh r0, [r3] \n\
-    add r0, #1 \n\
-    strh r0, [r3] \n\
-    add r1, #0x40 \n\
-    ldrb r0, [r1] \n\
-    add r6, r2, #0 \n\
-    cmp r0, #0xf \n\
-    bls lbl_08079230 \n\
-    b lbl_08079794 \n\
-lbl_08079230: \n\
-    lsl r0, r0, #2 \n\
-    ldr r1, lbl_08079240 @ =lbl_08079244 \n\
-    add r0, r0, r1 \n\
-    ldr r0, [r0] \n\
-    mov pc, r0 \n\
-    .align 2, 0 \n\
-lbl_0807923c: .4byte sNonGameplayRamPointer \n\
-lbl_08079240: .4byte lbl_08079244 \n\
-lbl_08079244: @ jump table \n\
-    .4byte lbl_08079284 @ case 0 \n\
-    .4byte lbl_080792d0 @ case 1 \n\
-    .4byte lbl_080792e8 @ case 2 \n\
-    .4byte lbl_08079300 @ case 3 \n\
-    .4byte lbl_080793e8 @ case 4 \n\
-    .4byte lbl_080794ec @ case 5 \n\
-    .4byte lbl_08079510 @ case 6 \n\
-    .4byte lbl_080795b2 @ case 7 \n\
-    .4byte lbl_080795d4 @ case 8 \n\
-    .4byte lbl_080795fc @ case 9 \n\
-    .4byte lbl_0807961c @ case 10 \n\
-    .4byte lbl_0807964c @ case 11 \n\
-    .4byte lbl_08079686 @ case 12 \n\
-    .4byte lbl_080796a0 @ case 13 \n\
-    .4byte lbl_080796bc @ case 14 \n\
-    .4byte lbl_08079780 @ case 15 \n\
-lbl_08079284: \n\
-    movs r0, #0 \n\
-    movs r1, #1 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    movs r0, #0 \n\
-    movs r1, #2 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    ldr r4, lbl_080792c8 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    add r0, #0x26 \n\
-    bl FileSelectFindFirstNonEmptyFile \n\
-    ldr r0, [r4] \n\
-    add r0, #0x26 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0 \n\
-    bl FileSelectUpdateCopyCursor \n\
-    movs r0, #0x12 \n\
-    bl FileSelectUpdateTilemap \n\
-    ldr r1, [r4] \n\
-    ldr r0, lbl_080792cc @ =sFileSelectMenuCursors_Empty \n\
-    ldrb r0, [r0] \n\
-    add r1, #0x2c \n\
-    movs r2, #0 \n\
-    strb r0, [r1] \n\
-    ldr r0, [r4] \n\
-    add r0, #0x3a \n\
-    strb r2, [r0] \n\
-    ldr r1, [r4] \n\
-    b lbl_08079766 \n\
-    .align 2, 0 \n\
-lbl_080792c8: .4byte sNonGameplayRamPointer \n\
-lbl_080792cc: .4byte sFileSelectMenuCursors_Empty \n\
-lbl_080792d0: \n\
-    movs r0, #0x13 \n\
-    bl FileSelectUpdateTilemap \n\
-    cmp r0, #0 \n\
-    bne lbl_080792dc \n\
-    b lbl_08079794 \n\
-lbl_080792dc: \n\
-    ldr r0, lbl_080792e4 @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    b lbl_08079766 \n\
-    .align 2, 0 \n\
-lbl_080792e4: .4byte sNonGameplayRamPointer \n\
-lbl_080792e8: \n\
-    movs r0, #1 \n\
-    movs r1, #2 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    bne lbl_080792f6 \n\
-    b lbl_08079794 \n\
-lbl_080792f6: \n\
-    ldr r0, lbl_080792fc @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    b lbl_08079766 \n\
-    .align 2, 0 \n\
-lbl_080792fc: .4byte sNonGameplayRamPointer \n\
-lbl_08079300: \n\
-    movs r4, #0 \n\
-    ldr r5, lbl_08079320 @ =gChangedInput \n\
-    ldrh r0, [r5] \n\
-    cmp r0, #0 \n\
-    beq lbl_08079354 \n\
-    ldr r1, [r6] \n\
-    add r1, #0x26 \n\
-    movs r0, #1 \n\
-    bl FileSelectApplyMenuSelectInput \n\
-    lsl r0, r0, #0x18 \n\
-    cmp r0, #0 \n\
-    beq lbl_08079324 \n\
-    movs r4, #1 \n\
-    b lbl_0807935a \n\
-    .align 2, 0 \n\
-lbl_08079320: .4byte gChangedInput \n\
-lbl_08079324: \n\
-    ldrh r1, [r5] \n\
-    movs r3, #2 \n\
-    add r0, r3, #0 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    beq lbl_08079332 \n\
-    b lbl_080796aa \n\
-lbl_08079332: \n\
-    movs r2, #1 \n\
-    add r0, r2, #0 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    beq lbl_08079354 \n\
-    ldr r0, [r6] \n\
-    add r1, r0, #0 \n\
-    add r1, #0x3b \n\
-    ldrb r1, [r1] \n\
-    add r0, #0x26 \n\
-    ldrb r0, [r0] \n\
-    asr r1, r0 \n\
-    and r1, r2 \n\
-    neg r0, r1\n\
-    orr r0, r1 \n\
-    asr r4, r0, #0x1f \n\
-    and r4, r3 \n\
-lbl_08079354: \n\
-    cmp r4, #0 \n\
-    bne lbl_0807935a \n\
-    b lbl_08079794 \n\
-lbl_0807935a: \n\
-    cmp r4, #1 \n\
-    bne lbl_08079378 \n\
-    movs r0, #2 \n\
-    bl FileSelectPlayMenuSound \n\
-    ldr r0, lbl_08079374 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r0] \n\
-    add r0, #0x26 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #1 \n\
-    bl FileSelectUpdateCopyCursor \n\
-    b lbl_08079794 \n\
-    .align 2, 0 \n\
-lbl_08079374: .4byte sNonGameplayRamPointer \n\
-lbl_08079378: \n\
-    cmp r4, #2 \n\
-    beq lbl_0807937e \n\
-    b lbl_08079794 \n\
-lbl_0807937e: \n\
-    ldr r4, lbl_080793bc @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    add r0, #0x26 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #2 \n\
-    bl FileSelectUpdateCopyCursor \n\
-    ldr r2, lbl_080793c0 @ =gSaveFilesInfo \n\
-    ldr r0, [r4] \n\
-    add r0, #0x26 \n\
-    ldrb r1, [r0] \n\
-    lsl r0, r1, #1 \n\
-    add r0, r0, r1 \n\
-    lsl r0, r0, #3 \n\
-    add r0, r0, r2 \n\
-    ldrb r0, [r0, #0x15] \n\
-    cmp r0, #0 \n\
-    beq lbl_080793c8 \n\
-    ldr r0, lbl_080793c4 @ =0x00000209 \n\
-    bl SoundPlay \n\
-    movs r0, #0 \n\
-    movs r1, #4 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    ldr r0, [r4] \n\
-    add r0, #0x40 \n\
-    movs r1, #9 \n\
-    strb r1, [r0] \n\
-    b lbl_08079794 \n\
-    .align 2, 0 \n\
-lbl_080793bc: .4byte sNonGameplayRamPointer \n\
-lbl_080793c0: .4byte gSaveFilesInfo \n\
-lbl_080793c4: .4byte 0x00000209 \n\
-lbl_080793c8: \n\
-    movs r0, #8 \n\
-    bl FileSelectPlayMenuSound \n\
-    bl FileSelectFileCopyChooseBaseDestinationFile \n\
-    ldr r0, [r4] \n\
-    add r0, #0x27 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0 \n\
-    bl FileSelectUpdateCopyArrow \n\
-    movs r0, #0x1b \n\
-    bl FileSelectUpdateTilemap \n\
-    ldr r1, [r4] \n\
-    b lbl_08079766 \n\
-lbl_080793e8: \n\
-    movs r4, #0 \n\
-    ldr r5, lbl_08079408 @ =gChangedInput \n\
-    ldrh r0, [r5] \n\
-    cmp r0, #0 \n\
-    beq lbl_08079420 \n\
-    ldr r1, [r6] \n\
-    add r1, #0x27 \n\
-    movs r0, #2 \n\
-    bl FileSelectApplyMenuSelectInput \n\
-    lsl r0, r0, #0x18 \n\
-    cmp r0, #0 \n\
-    beq lbl_0807940c \n\
-    movs r4, #1 \n\
-    b lbl_08079460 \n\
-    .align 2, 0 \n\
-lbl_08079408: .4byte gChangedInput \n\
-lbl_0807940c: \n\
-    ldrh r1, [r5] \n\
-    movs r0, #2 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    bne lbl_08079428 \n\
-    movs r0, #1 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    beq lbl_08079420 \n\
-    movs r4, #2 \n\
-lbl_08079420: \n\
-    cmp r4, #0 \n\
-    bne lbl_08079426 \n\
-    b lbl_08079794 \n\
-lbl_08079426: \n\
-    b lbl_08079460 \n\
-lbl_08079428: \n\
-    ldr r0, lbl_08079458 @ =0x00000209 \n\
-    bl SoundPlay \n\
-    ldr r4, lbl_0807945c @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    add r0, #0x26 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0 \n\
-    bl FileSelectUpdateCopyCursor \n\
-    ldr r0, [r4] \n\
-    add r0, #0x27 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #3 \n\
-    bl FileSelectUpdateCopyArrow \n\
-    movs r0, #0x1a \n\
-    bl FileSelectUpdateTilemap \n\
-    ldr r0, [r4] \n\
-    add r0, #0x40 \n\
-    movs r1, #3 \n\
-    strb r1, [r0] \n\
-    b lbl_08079794 \n\
-    .align 2, 0 \n\
-lbl_08079458: .4byte 0x00000209 \n\
-lbl_0807945c: .4byte sNonGameplayRamPointer \n\
-lbl_08079460: \n\
-    cmp r4, #1 \n\
-    bne lbl_08079480 \n\
-    ldr r0, lbl_0807947c @ =sNonGameplayRamPointer \n\
-    ldr r0, [r0] \n\
-    add r0, #0x27 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #1 \n\
-    bl FileSelectUpdateCopyArrow \n\
-    movs r0, #9 \n\
-    bl FileSelectPlayMenuSound \n\
-    b lbl_08079794 \n\
-    .align 2, 0 \n\
-lbl_0807947c: .4byte sNonGameplayRamPointer \n\
-lbl_08079480: \n\
-    cmp r4, #2 \n\
-    beq lbl_08079486 \n\
-    b lbl_08079794 \n\
-lbl_08079486: \n\
-    ldr r4, lbl_080794d4 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    ldr r1, lbl_080794d8 @ =sFileSelectMenuCursors_Empty \n\
-    ldrb r1, [r1] \n\
-    add r0, #0x2c \n\
-    strb r1, [r0] \n\
-    ldr r0, [r4] \n\
-    add r0, #0x27 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #2 \n\
-    bl FileSelectUpdateCopyArrow \n\
-    ldr r0, [r4] \n\
-    add r1, r0, #0 \n\
-    add r1, #0x3b \n\
-    ldrb r1, [r1] \n\
-    add r0, #0x27 \n\
-    ldrb r0, [r0] \n\
-    asr r1, r0 \n\
-    movs r0, #1 \n\
-    and r1, r0 \n\
-    cmp r1, #0 \n\
-    beq lbl_080794dc \n\
-    movs r0, #0 \n\
-    movs r1, #3 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    movs r0, #0x16 \n\
-    bl FileSelectUpdateTilemap \n\
-    movs r0, #8 \n\
-    bl FileSelectPlayMenuSound \n\
-    ldr r0, [r4] \n\
-    add r0, #0x40 \n\
-    movs r1, #5 \n\
-    strb r1, [r0] \n\
-    b lbl_08079794 \n\
-    .align 2, 0 \n\
-lbl_080794d4: .4byte sNonGameplayRamPointer \n\
-lbl_080794d8: .4byte sFileSelectMenuCursors_Empty \n\
-lbl_080794dc: \n\
-    movs r0, #0xa \n\
-    bl FileSelectPlayMenuSound \n\
-    ldr r0, [r4] \n\
-    add r0, #0x40 \n\
-    movs r1, #0xb \n\
-    strb r1, [r0] \n\
-    b lbl_08079794 \n\
-lbl_080794ec: \n\
-    movs r0, #0x17 \n\
-    bl FileSelectUpdateTilemap \n\
-    cmp r0, #0 \n\
-    bne lbl_080794f8 \n\
-    b lbl_08079794 \n\
-lbl_080794f8: \n\
-    ldr r4, lbl_0807950c @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    add r0, #0x2c \n\
-    ldrb r1, [r0] \n\
-    movs r0, #4 \n\
-    bl unk_7e3fc \n\
-    ldr r1, [r4] \n\
-    b lbl_08079766 \n\
-    .align 2, 0 \n\
-lbl_0807950c: .4byte sNonGameplayRamPointer \n\
-lbl_08079510: \n\
-    movs r4, #0xff \n\
-    ldr r0, lbl_08079538 @ =gChangedInput \n\
-    ldrh r1, [r0] \n\
-    cmp r1, #0 \n\
-    beq lbl_080795a0 \n\
-    movs r0, #1 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    beq lbl_0807954e \n\
-    ldr r1, [r6] \n\
-    add r0, r1, #0 \n\
-    add r0, #0x2c \n\
-    ldrb r0, [r0] \n\
-    cmp r0, #0 \n\
-    beq lbl_0807953c \n\
-    add r1, #0x40 \n\
-    movs r0, #7 \n\
-    strb r0, [r1] \n\
-    b lbl_080795a0 \n\
-    .align 2, 0 \n\
-lbl_08079538: .4byte gChangedInput \n\
-lbl_0807953c: \n\
-    movs r0, #0xa \n\
-    bl FileSelectPlayMenuSound \n\
-    movs r4, #0x80 \n\
-    ldr r0, [r6] \n\
-    add r0, #0x40 \n\
-    movs r1, #0xb \n\
-    strb r1, [r0] \n\
-    b lbl_080795a0 \n\
-lbl_0807954e: \n\
-    movs r0, #2 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    beq lbl_08079560 \n\
-    ldr r0, [r6] \n\
-    add r0, #0x40 \n\
-    movs r1, #7 \n\
-    strb r1, [r0] \n\
-    b lbl_080795a0 \n\
-lbl_08079560: \n\
-    movs r0, #0x20 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    beq lbl_08079580 \n\
-    ldr r0, [r6] \n\
-    add r1, r0, #0 \n\
-    add r1, #0x2c \n\
-    ldrb r0, [r1] \n\
-    cmp r0, #0 \n\
-    beq lbl_080795a0 \n\
-    movs r4, #0 \n\
-    strb r4, [r1] \n\
-    movs r0, #0 \n\
-    bl FileSelectPlayMenuSound \n\
-    b lbl_080795a0 \n\
-lbl_08079580: \n\
-    movs r0, #0x10 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    beq lbl_080795a0 \n\
-    ldr r0, [r6] \n\
-    add r1, r0, #0 \n\
-    add r1, #0x2c \n\
-    ldrb r0, [r1] \n\
-    cmp r0, #0 \n\
-    bne lbl_080795a0 \n\
-    movs r4, #1 \n\
-    movs r0, #1 \n\
-    strb r0, [r1] \n\
-    movs r0, #0 \n\
-    bl FileSelectPlayMenuSound \n\
-lbl_080795a0: \n\
-    add r0, r4, #1 \n\
-    cmp r0, #0 \n\
-    bne lbl_080795a8 \n\
-    b lbl_08079794 \n\
-lbl_080795a8: \n\
-    add r1, r4, #0 \n\
-    movs r0, #4 \n\
-    bl unk_7e3fc \n\
-    b lbl_08079794 \n\
-lbl_080795b2: \n\
-    ldr r0, lbl_080795cc @ =0x00000209 \n\
-    bl SoundPlay \n\
-    movs r0, #4 \n\
-    movs r1, #0x81 \n\
-    bl unk_7e3fc \n\
-    movs r0, #0x18 \n\
-    bl FileSelectUpdateTilemap \n\
-    ldr r0, lbl_080795d0 @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    b lbl_08079766 \n\
-    .align 2, 0 \n\
-lbl_080795cc: .4byte 0x00000209 \n\
-lbl_080795d0: .4byte sNonGameplayRamPointer \n\
-lbl_080795d4: \n\
-    movs r0, #0x19 \n\
-    bl FileSelectUpdateTilemap \n\
-    cmp r0, #0 \n\
-    bne lbl_080795e0 \n\
-    b lbl_08079794 \n\
-lbl_080795e0: \n\
-    ldr r4, lbl_080795f8 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    add r0, #0x27 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0 \n\
-    bl FileSelectUpdateCopyArrow \n\
-    ldr r0, [r4] \n\
-    add r0, #0x40 \n\
-    movs r1, #4 \n\
-    strb r1, [r0] \n\
-    b lbl_08079794 \n\
-    .align 2, 0 \n\
-lbl_080795f8: .4byte sNonGameplayRamPointer \n\
-lbl_080795fc: \n\
-    movs r0, #1 \n\
-    movs r1, #4 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    bne lbl_0807960a \n\
-    b lbl_08079794 \n\
-lbl_0807960a: \n\
-    movs r0, #0x1c \n\
-    bl FileSelectUpdateTilemap \n\
-    ldr r0, lbl_08079618 @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    b lbl_08079766 \n\
-    .align 2, 0 \n\
-lbl_08079618: .4byte sNonGameplayRamPointer \n\
-lbl_0807961c: \n\
-    ldr r0, lbl_08079648 @ =gChangedInput \n\
-    ldrh r1, [r0] \n\
-    movs r0, #3 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    bne lbl_0807962a \n\
-    b lbl_08079794 \n\
-lbl_0807962a: \n\
-    ldr r0, [r6] \n\
-    add r0, #0x26 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0 \n\
-    bl FileSelectUpdateCopyCursor \n\
-    movs r0, #0x1a \n\
-    bl FileSelectUpdateTilemap \n\
-    ldr r0, [r6] \n\
-    add r0, #0x40 \n\
-    movs r1, #3 \n\
-    strb r1, [r0] \n\
-    b lbl_08079794 \n\
-    .align 2, 0 \n\
-lbl_08079648: .4byte gChangedInput \n\
-lbl_0807964c: \n\
-    ldr r1, [r6] \n\
-    add r0, r1, #0 \n\
-    add r0, #0x26 \n\
-    ldrb r0, [r0] \n\
-    add r1, #0x27 \n\
-    ldrb r1, [r1] \n\
-    bl SramCopyFile \n\
-    cmp r0, #0 \n\
-    bne lbl_08079662 \n\
-    b lbl_08079794 \n\
-lbl_08079662: \n\
-    ldr r0, [r6] \n\
-    add r0, #0x3a \n\
-    movs r1, #1 \n\
-    strb r1, [r0] \n\
-    ldr r1, [r6] \n\
-    add r0, r1, #0 \n\
-    add r0, #0x2c \n\
-    ldrb r0, [r0] \n\
-    cmp r0, #0 \n\
-    beq lbl_0807967e \n\
-    add r1, #0x40 \n\
-    movs r0, #0xe \n\
-    strb r0, [r1] \n\
-    b lbl_08079794 \n\
-lbl_0807967e: \n\
-    add r1, #0x40 \n\
-    movs r0, #0xc \n\
-    strb r0, [r1] \n\
-    b lbl_08079794 \n\
-lbl_08079686: \n\
-    movs r0, #4 \n\
-    movs r1, #0x81 \n\
-    bl unk_7e3fc \n\
-    movs r0, #0x18 \n\
-    bl FileSelectUpdateTilemap \n\
-    ldr r0, lbl_0807969c @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    b lbl_08079766 \n\
-    .align 2, 0 \n\
-lbl_0807969c: .4byte sNonGameplayRamPointer \n\
-lbl_080796a0: \n\
-    movs r0, #0x19 \n\
-    bl FileSelectUpdateTilemap \n\
-    cmp r0, #0 \n\
-    beq lbl_08079794 \n\
-lbl_080796aa: \n\
-    ldr r0, lbl_080796b8 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r0] \n\
-    add r0, #0x40 \n\
-    movs r1, #0xe \n\
-    strb r1, [r0] \n\
-    b lbl_08079794 \n\
-    .align 2, 0 \n\
-lbl_080796b8: .4byte sNonGameplayRamPointer \n\
-lbl_080796bc: \n\
-    add r5, r6, #0 \n\
-    ldr r1, [r5] \n\
-    add r0, r1, #0 \n\
-    add r0, #0x3a \n\
-    ldrb r0, [r0] \n\
-    cmp r0, #0 \n\
-    beq lbl_08079746 \n\
-    add r0, r1, #0 \n\
-    add r0, #0x27 \n\
-    ldrb r0, [r0] \n\
-    bl FileSelectDisplaySaveFileHealth \n\
-    ldr r0, [r5] \n\
-    add r0, #0x27 \n\
-    ldrb r0, [r0] \n\
-    bl FileSelectDisplaySaveFileTimer \n\
-    ldr r0, [r5] \n\
-    add r0, #0x27 \n\
-    ldrb r1, [r0] \n\
-    lsl r0, r1, #1 \n\
-    add r0, r0, r1 \n\
-    lsl r0, r0, #3 \n\
-    ldr r4, lbl_08079770 @ =gSaveFilesInfo \n\
-    add r0, r0, r4 \n\
-    bl FileSelectDisplaySaveFileMiscInfo \n\
-    ldr r3, [r5] \n\
-    ldr r0, lbl_08079774 @ =sFileSelectFileOamOffsets \n\
-    add r1, r3, #0 \n\
-    add r1, #0x27 \n\
-    ldrb r2, [r1] \n\
-    lsl r1, r2, #1 \n\
-    add r0, #1 \n\
-    add r0, r1, r0 \n\
-    ldrb r0, [r0] \n\
-    lsl r0, r0, #4 \n\
-    add r3, r3, r0 \n\
-    add r1, r1, r2 \n\
-    lsl r1, r1, #3 \n\
-    add r1, r1, r4 \n\
-    ldrb r1, [r1, #0x11] \n\
-    lsl r1, r1, #0x18 \n\
-    asr r1, r1, #0x18 \n\
-    neg r0, r1\n\
-    orr r0, r1 \n\
-    asr r0, r0, #0x1f \n\
-    movs r1, #2 \n\
-    add r3, #0x7f \n\
-    and r1, r0 \n\
-    lsl r1, r1, #6 \n\
-    ldrb r2, [r3] \n\
-    movs r0, #0x3f \n\
-    and r0, r2 \n\
-    orr r0, r1 \n\
-    strb r0, [r3] \n\
-    bl FileScreenSetEnabledMenuFlags \n\
-    ldr r0, lbl_08079778 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #4 \n\
-    add r1, r1, r3 \n\
-    ldr r2, lbl_0807977c @ =0x0600d800 \n\
-    movs r0, #0x10 \n\
-    str r0, [sp] \n\
-    movs r0, #3 \n\
-    bl DmaTransfer \n\
-lbl_08079746: \n\
-    ldr r0, [r6] \n\
-    add r0, #0x26 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #3 \n\
-    bl FileSelectUpdateCopyCursor \n\
-    ldr r0, [r6] \n\
-    add r0, #0x27 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #3 \n\
-    bl FileSelectUpdateCopyArrow \n\
-    movs r0, #0x14 \n\
-    bl FileSelectUpdateTilemap \n\
-    ldr r1, [r6] \n\
-lbl_08079766: \n\
-    add r1, #0x40 \n\
-    ldrb r0, [r1] \n\
-    add r0, #1 \n\
-    strb r0, [r1] \n\
-    b lbl_08079794 \n\
-    .align 2, 0 \n\
-lbl_08079770: .4byte gSaveFilesInfo \n\
-lbl_08079774: .4byte sFileSelectFileOamOffsets \n\
-lbl_08079778: .4byte sEwramPointer \n\
-lbl_0807977c: .4byte 0x0600d800 \n\
-lbl_08079780: \n\
-    movs r0, #0x15 \n\
-    bl FileSelectUpdateTilemap \n\
-    cmp r0, #0 \n\
-    beq lbl_08079794 \n\
-    movs r0, #2 \n\
-    movs r1, #0xff \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    movs r7, #1 \n\
-lbl_08079794: \n\
-    add r0, r7, #0 \n\
-    add sp, #4 \n\
-    pop {r4, r5, r6, r7} \n\
-    pop {r1} \n\
-    bx r1 \n\
-    ");
-}
-#endif
-
 
 /**
  * @brief 797a0 | 3b0 | File erasure main loop
