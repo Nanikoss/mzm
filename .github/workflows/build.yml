@@ -1,80 +1,52 @@
-name: Ci
+name: Build and Track Progress
 
 on:
-    workflow_dispatch:
-    push:
-        branches: [ master ]
-    pull_request_target:
-      types: [opened, synchronize]
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Get User Permission
-              id: checkAccess
-              uses: actions-cool/check-user-permission@v2
-              with:
-                require: write
-                username: ${{ github.triggering_actor }}
+  build_project:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Define your game's versions here (e.g., US, JP, EU)
+        version: [ SLUS_203.88 ] 
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            - name: Check User Permission
-              if: steps.checkAccess.outputs.require-result == 'false'
-              run: |
-                echo "${{ github.triggering_actor }} does not have permissions on this repo."
-                echo "Current permission level is ${{ steps.checkAccess.outputs.user-permission }}"
-                echo "Job originally triggered by ${{ github.actor }}"
-                exit 1
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-            - name: Checkout
-              uses: actions/checkout@v3
-              with:
-                ref: ${{  github.event.pull_request.head.sha }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
+          pip install -r requirements.txt # Remove if your project doesn't use python dependencies
 
-            - name: Test secrets
-              run: |
-                if [[ "x${{ secrets.TEST_SECRET }}" == "xval" ]]; then
-                  echo "Access to secrets"
-                else
-                  echo "No access to secrets"
-                  exit 1
-                fi
+      - name: Run build system
+        run: |
+          python configure.py --version ${{ matrix.version }}
+          ninja
 
-            - name: Checkout agbcc
-              uses: actions/checkout@master
-              with:
-                path: agbcc
-                repository: jiangzhengwenjz/agbcc
+      - name: Download objdiff-cli
+        run: |
+          # Automatically fetches the latest stable release tool
+          curl -L -o objdiff-cli https://github.com
+          chmod +x objdiff-cli
 
-            - name: Install binutils
-              run: |
-               sudo apt install gcc-arm-none-eabi binutils-arm-none-eabi
+      - name: Generate progress report
+        run: |
+          ./objdiff-cli report generate -o build/report.json
 
-            - name: Install agbcc
-              run: |
-                ./build.sh
-                ./install.sh ../
-                echo $PWD >> "$GITHUB_PATH"
-              working-directory: agbcc
-
-            - name: Build preproc
-              run: |
-                make
-              working-directory: tools/preproc
-
-            - name: Get roms
-              uses: actions/checkout@master
-              with:
-                ref: main
-                path: baseroms
-                repository: YohannDR/Roms
-                ssh-key: ${{ secrets.ROMS_REPO }}
-            
-            - name: Move roms
-              run: |
-                cp baseroms/* .
-
-            - name: Check
-              run: |
-                chmod +x check_roms.sh
-                ./check_roms.sh
+      - name: Upload progress report
+        uses: actions/upload-artifact@v4
+        with:
+          # Crucial requirement: The artifact name must match this format exactly
+          name: ${{ matrix.version }}_report
+          path: build/report.json
