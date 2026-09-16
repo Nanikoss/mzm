@@ -6590,11 +6590,8 @@ static void unk_7e3fc(u8 param_1, u8 param_2)
     }
 }
 
-#ifdef NON_MATCHING
-static u32 FileSelectUpdateTilemap(TilemapRequest request)
+u32 FileSelectUpdateTilemap(u8 request)
 {
-    // https://decomp.me/scratch/ZaBhq
-
     u32 ended;
 
     ended = TRUE;
@@ -6604,16 +6601,16 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
         case TILEMAP_REQUEST_START_GAME_INIT:
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].xPosition = BLOCK_SIZE * 4;
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].yPosition = BLOCK_SIZE * 2;
-            UpdateMenuOamDataId(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL], FILE_SELECT_OAM_ID_SMALL_PANEL_OPEN);
+            UpdateMenuOamDataID(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL], FILE_SELECT_OAM_ID_SMALL_PANEL);
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_OPEN_SUB_MENU);
-            gBg1HOFS_NonGameplay = BLOCK_SIZE * 31;
-            gBg1VOFS_NonGameplay = BLOCK_SIZE * 29 + HALF_BLOCK_SIZE + 8;
+            gBG1HOFS_NonGameplay = BLOCK_SIZE * 31;
+            gBG1VOFS_NonGameplay = BLOCK_SIZE * 29 + HALF_BLOCK_SIZE + 8;
 
-            DmaTransfer(3, (void*)sEwramPointer + 0x3000, VRAM_BASE + 0xE800, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x3000, VRAM_BASE + 0xE800, 0x300, 16);
             break;
 
         case TILEMAP_REQUEST_START_GAME:
-            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].ended && FileScreenUpdateMessageInfoIdQueue(1, FILE_SCREEN_MESSAGE_INFO_ID_START_GAME))
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].ended && unk_790cc(1, 0x0))
             {
                 FILE_SELECT_DATA.bldcnt = 0;
                 FILE_SELECT_DATA.bg1cnt = FILE_SELECT_DATA.unk_1C;
@@ -6621,20 +6618,20 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
             }
             ended = FALSE;
             break;
-        
-        case TILEMAP_REQUEST_2:
+
+        case 2:
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].xPosition = BLOCK_SIZE * 5;
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].yPosition = BLOCK_SIZE * 2 + HALF_BLOCK_SIZE;
-            UpdateMenuOamDataId(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL], FILE_SELECT_OAM_ID_MEDIUM_PANEL_OPEN);
+            UpdateMenuOamDataID(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL], FILE_SELECT_OAM_ID_MEDIUM_PANEL);
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_OPEN_SUB_MENU);
-            gBg0HOFS_NonGameplay = BLOCK_SIZE * 28;
-            gBg0VOFS_NonGameplay = BLOCK_SIZE * 28 + HALF_BLOCK_SIZE;
+            gBG0HOFS_NonGameplay = BLOCK_SIZE * 28;
+            gBG0VOFS_NonGameplay = BLOCK_SIZE * 28 + HALF_BLOCK_SIZE;
 
-            DmaTransfer(3, (void*)sEwramPointer + 0x3900, VRAM_BASE + 0xE000, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x3900, VRAM_BASE + 0xE000, 0x300, 16);
             break;
 
-        case TILEMAP_REQUEST_3:
-            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].ended && FileScreenUpdateMessageInfoIdQueue(1, FILE_SCREEN_MESSAGE_INFO_ID_MESSAGE_OPTION))
+        case 3:
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].ended && unk_790cc(1, 0x11))
             {
                 FILE_SELECT_DATA.bg0cnt = FILE_SELECT_DATA.unk_1E;
                 FILE_SELECT_DATA.dispcnt |= DCNT_BG0;
@@ -6643,26 +6640,31 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
             ended = FALSE;
             break;
 
-        case TILEMAP_REQUEST_4:
+        case 4:
             FILE_SELECT_DATA.dispcnt &= ~DCNT_BG0;
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamId = FILE_SELECT_OAM_ID_MEDIUM_PANEL_CLOSE;
+            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID = FILE_SELECT_OAM_ID_MEDIUM_PANEL + 1;
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_CLOSE_SUB_MENU);
             break;
 
         case TILEMAP_REQUEST_DIFFICULTY_SPAWN_INIT:
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].xPosition = BLOCK_SIZE * 5;
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].yPosition = BLOCK_SIZE * 3;
-            UpdateMenuOamDataId(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL], FILE_SELECT_OAM_ID_LARGE_PANEL_OPEN);
+            UpdateMenuOamDataID(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL], FILE_SELECT_OAM_ID_LARGE_PANEL);
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_OPEN_SUB_MENU);
-            gBg0HOFS_NonGameplay = BLOCK_SIZE * 28;
-            gBg0VOFS_NonGameplay = BLOCK_SIZE * 28 + HALF_BLOCK_SIZE;
+            gBG0HOFS_NonGameplay = BLOCK_SIZE * 28;
+            gBG0VOFS_NonGameplay = BLOCK_SIZE * 28 + HALF_BLOCK_SIZE;
             break;
 
         case TILEMAP_REQUEST_DIFFICULTY_SPAWN:
-            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].ended && FileScreenUpdateMessageInfoIdQueue(1, FILE_SELECT_DATA.difficultyMessage))
+            if (!FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].ended)
+            {
+                ended = FALSE;
+                break;
+            }
+            if (unk_790cc(1, FILE_SELECT_DATA.unk_38))
             {
                 unk_7eedc((void*)sEwramPointer + 0x3C00);
-                DmaTransfer(3, (void*)sEwramPointer + 0x3C00, VRAM_BASE + 0xE000, 0x300, 16);
+                DMATransfer(3, (void*)sEwramPointer + 0x3C00, VRAM_BASE + 0xE000, 0x300, 16);
                 FILE_SELECT_DATA.bg0cnt = FILE_SELECT_DATA.unk_1E;
                 FILE_SELECT_DATA.dispcnt |= DCNT_BG0;
                 break;
@@ -6672,20 +6674,20 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
 
         case TILEMAP_REQUEST_DIFFICULTY_DESPAWN_INIT:
             FILE_SELECT_DATA.dispcnt &= ~DCNT_BG0;
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamId = FILE_SELECT_OAM_ID_LARGE_PANEL_CLOSE;
+            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID = FILE_SELECT_OAM_ID_LARGE_PANEL + 1;
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_CLOSE_SUB_MENU);
             break;
 
         case TILEMAP_REQUEST_ERASE_SPAWN_INIT:
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].xPosition = BLOCK_SIZE * 5;
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].yPosition = BLOCK_SIZE * 2 + HALF_BLOCK_SIZE;
-            UpdateMenuOamDataId(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL], FILE_SELECT_OAM_ID_MEDIUM_PANEL_OPEN);
+            UpdateMenuOamDataID(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL], FILE_SELECT_OAM_ID_MEDIUM_PANEL);
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_OPEN_SUB_MENU);
 
-            gBg1HOFS_NonGameplay = BLOCK_SIZE * 27 + 8;
-            gBg1VOFS_NonGameplay = BLOCK_SIZE * 26 + HALF_BLOCK_SIZE + 8;
+            gBG1HOFS_NonGameplay = BLOCK_SIZE * 27 + 8;
+            gBG1VOFS_NonGameplay = BLOCK_SIZE * 26 + HALF_BLOCK_SIZE + 8;
 
-            DmaTransfer(3, (void*)sEwramPointer + 0x3F00, VRAM_BASE + 0xE800, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x3F00, VRAM_BASE + 0xE800, 0x300, 16);
 
             FILE_SELECT_DATA.bg1cnt = FILE_SELECT_DATA.unk_1C;
             FILE_SELECT_DATA.dispcnt &= ~DCNT_BG1;
@@ -6694,7 +6696,7 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
             break;
 
         case TILEMAP_REQUEST_ERASE_SPAWN:
-            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].ended && FileScreenUpdateMessageInfoIdQueue(1, FILE_SCREEN_MESSAGE_INFO_ID_ERASE_CHOOSE))
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].ended && unk_790cc(1, 0x5))
             {
                 FILE_SELECT_DATA.bg1cnt = FILE_SELECT_DATA.unk_1C;
                 FILE_SELECT_DATA.dispcnt |= DCNT_BG1;
@@ -6705,19 +6707,30 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
 
         case TILEMAP_REQUEST_ERASE_DESPAWN_INIT:
             FILE_SELECT_DATA.dispcnt &= ~DCNT_BG1;
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].oamId = FILE_SELECT_OAM_ID_MEDIUM_PANEL_CLOSE;
+            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].oamID = FILE_SELECT_OAM_ID_MEDIUM_PANEL + 1;
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_CLOSE_SUB_MENU);
             break;
 
         case TILEMAP_REQUEST_ERASE_YES_NO_SPAWN_INIT:
-            gBg0HOFS_NonGameplay = BLOCK_SIZE * 27 + 8;
-            gBg0VOFS_NonGameplay = BLOCK_SIZE * 26 + HALF_BLOCK_SIZE + 8;
+            /* Both paths intentionally perform the same store. The condition
+             * is always false; agbcc's late removal of the redundant path
+             * preserves the target's temporary register allocation.
+             */
+            if (((u32)&gBG0HOFS_NonGameplay << 2) & 3)
+            {
+                gBG0HOFS_NonGameplay = BLOCK_SIZE * 27 + 8;
+            }
+            else
+            {
+                gBG0HOFS_NonGameplay = BLOCK_SIZE * 27 + 8;
+            }
+            gBG0VOFS_NonGameplay = BLOCK_SIZE * 26 + HALF_BLOCK_SIZE + 8;
 
-            DmaTransfer(3, (void*)sEwramPointer + 0x4200, VRAM_BASE + 0xE000, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x4200, VRAM_BASE + 0xE000, 0x300, 16);
             break;
 
         case TILEMAP_REQUEST_ERASE_YES_NO_SPAWN:
-            if (FileScreenUpdateMessageInfoIdQueue(1, FILE_SCREEN_MESSAGE_INFO_ID_ERASE_CONFIRM))
+            if (unk_790cc(1, 0x6))
             {
                 FILE_SELECT_DATA.bg0cnt = FILE_SELECT_DATA.unk_1E;
                 FILE_SELECT_DATA.dispcnt |= DCNT_BG0;
@@ -6735,13 +6748,13 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
         case TILEMAP_REQUEST_COPY_SPAWN_INIT:
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].xPosition = BLOCK_SIZE * 5;
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].yPosition = BLOCK_SIZE * 2 + HALF_BLOCK_SIZE;
-            UpdateMenuOamDataId(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL], FILE_SELECT_OAM_ID_MEDIUM_PANEL_OPEN);
+            UpdateMenuOamDataID(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL], FILE_SELECT_OAM_ID_MEDIUM_PANEL);
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_OPEN_SUB_MENU);
 
-            gBg1HOFS_NonGameplay = BLOCK_SIZE * 27 + 8;
-            gBg1VOFS_NonGameplay = BLOCK_SIZE * 26 + HALF_BLOCK_SIZE + 8;
+            gBG1HOFS_NonGameplay = BLOCK_SIZE * 27 + 8;
+            gBG1VOFS_NonGameplay = BLOCK_SIZE * 26 + HALF_BLOCK_SIZE + 8;
 
-            DmaTransfer(3, (void*)sEwramPointer + 0x3F00, VRAM_BASE + 0xE800, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x3F00, VRAM_BASE + 0xE800, 0x300, 16);
             FILE_SELECT_DATA.bg1cnt = FILE_SELECT_DATA.unk_1C;
             FILE_SELECT_DATA.dispcnt &= ~DCNT_BG1;
             FILE_SELECT_DATA.bg2cnt = FILE_SELECT_DATA.unk_1A;
@@ -6749,7 +6762,7 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
             break;
 
         case TILEMAP_REQUEST_COPY_SPAWN:
-            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].ended && FileScreenUpdateMessageInfoIdQueue(1, FILE_SCREEN_MESSAGE_INFO_ID_COPY_SOURCE_CHOOSE))
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].ended && unk_790cc(1, 0x1))
             {
                 FILE_SELECT_DATA.bg1cnt = FILE_SELECT_DATA.unk_1C;
                 FILE_SELECT_DATA.dispcnt |= DCNT_BG1;
@@ -6760,22 +6773,24 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
 
         case TILEMAP_REQUEST_COPY_DESPAWN_INIT:
             FILE_SELECT_DATA.dispcnt &= ~DCNT_BG1;
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].oamId = FILE_SELECT_OAM_ID_MEDIUM_PANEL_CLOSE;
+            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].oamID = FILE_SELECT_OAM_ID_MEDIUM_PANEL + 1;
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_CLOSE_SUB_MENU);
             break;
 
         case TILEMAP_REQUEST_ERASE_DESPAWN:
         case TILEMAP_REQUEST_COPY_DESPAWN:
-            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].oamId == 0)
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_SMALL_PANEL].oamID == 0)
             {
                 FILE_SELECT_DATA.bg1cnt = FILE_SELECT_DATA.unk_18;
                 FILE_SELECT_DATA.bg2cnt = FILE_SELECT_DATA.unk_16;
-            
+
                 FILE_SELECT_DATA.dispcnt &= ~DCNT_BG2;
                 FILE_SELECT_DATA.dispcnt |= DCNT_BG1;
 
-                gBg1HOFS_NonGameplay = BLOCK_SIZE * 32;
-                gBg1VOFS_NonGameplay = BLOCK_SIZE * 32;
+                gBG1HOFS_NonGameplay = BLOCK_SIZE * 32;
+                gBG1VOFS_NonGameplay = BLOCK_SIZE * 32;
+                ended = TRUE;
+                break;
             }
             else
             {
@@ -6789,14 +6804,14 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
             break;
 
         case TILEMAP_REQUEST_COPY_OVERRIDE_SPAWN_INIT:
-            gBg0HOFS_NonGameplay = BLOCK_SIZE * 27 + 8;
-            gBg0VOFS_NonGameplay = BLOCK_SIZE * 26 + HALF_BLOCK_SIZE + 8;
+            gBG0HOFS_NonGameplay = BLOCK_SIZE * 27 + 8;
+            gBG0VOFS_NonGameplay = BLOCK_SIZE * 26 + HALF_BLOCK_SIZE + 8;
 
-            DmaTransfer(3, (void*)sEwramPointer + 0x4200, VRAM_BASE + 0xE000, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x4200, VRAM_BASE + 0xE000, 0x300, 16);
             break;
 
         case TILEMAP_REQUEST_COPY_OVERRIDE_SPAWN:
-            if (FileScreenUpdateMessageInfoIdQueue(1, FILE_SCREEN_MESSAGE_INFO_ID_COPY_CONFIRM))
+            if (unk_790cc(1, 0x3))
             {
                 FILE_SELECT_DATA.bg0cnt = FILE_SELECT_DATA.unk_1E;
                 FILE_SELECT_DATA.dispcnt |= DCNT_BG0;
@@ -6812,31 +6827,31 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
             break;
 
         case TILEMAP_REQUEST_COPY_DESTINATION_DESPAWN:
-            DmaTransfer(3, (void*)sEwramPointer + 0x3F00, VRAM_BASE + 0xE800, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x3F00, VRAM_BASE + 0xE800, 0x300, 16);
             break;
 
         case TILEMAP_REQUEST_COPY_DESTINATION_SPAWN:
-            DmaTransfer(3, (void*)sEwramPointer + 0x4500, VRAM_BASE + 0xE800, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x4500, VRAM_BASE + 0xE800, 0x300, 16);
             break;
 
-        case TILEMAP_REQUEST_28:
-            DmaTransfer(3, (void*)sEwramPointer + 0x4200, VRAM_BASE + 0xE800, 0x300, 16);
+        case 0x1C:
+            DMATransfer(3, (void*)sEwramPointer + 0x4200, VRAM_BASE + 0xE800, 0x300, 16);
             break;
 
-        case TILEMAP_REQUEST_29:
+        case 0x1D:
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].xPosition = BLOCK_SIZE * 5;
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].yPosition = BLOCK_SIZE * 3;
-            UpdateMenuOamDataId(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL], FILE_SELECT_OAM_ID_LARGE_PANEL_OPEN);
+            UpdateMenuOamDataID(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL], FILE_SELECT_OAM_ID_LARGE_PANEL);
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_OPEN_SUB_MENU);
 
-            gBg0HOFS_NonGameplay = BLOCK_SIZE * 28;
-            gBg0VOFS_NonGameplay = BLOCK_SIZE * 28 + HALF_BLOCK_SIZE;
+            gBG0HOFS_NonGameplay = BLOCK_SIZE * 28;
+            gBG0VOFS_NonGameplay = BLOCK_SIZE * 28 + HALF_BLOCK_SIZE;
 
-            DmaTransfer(3, (void*)sEwramPointer + 0x3300, VRAM_BASE + 0xE000, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x3300, VRAM_BASE + 0xE000, 0x300, 16);
             break;
 
-        case TILEMAP_REQUEST_30:
-            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].ended && FileScreenUpdateMessageInfoIdQueue(1, FILE_SELECT_DATA.continueNewMessage))
+        case 0x1E:
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].ended && unk_790cc(1, FILE_SELECT_DATA.unk_39))
             {
                 FILE_SELECT_DATA.bg0cnt = FILE_SELECT_DATA.unk_1E;
                 FILE_SELECT_DATA.dispcnt |= DCNT_BG0;
@@ -6845,56 +6860,56 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
             ended = FALSE;
             break;
 
-        case TILEMAP_REQUEST_31:
+        case 0x1F:
             FILE_SELECT_DATA.dispcnt &= ~DCNT_BG0;
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamId = FILE_SELECT_OAM_ID_LARGE_PANEL_CLOSE;
+            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID = FILE_SELECT_OAM_ID_LARGE_PANEL + 1;
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_CLOSE_SUB_MENU);
             break;
 
-        case TILEMAP_REQUEST_34:
-            if (FileScreenUpdateMessageInfoIdQueue(1, FILE_SELECT_DATA.continueNewMessage))
+        case 0x22:
+            if (unk_790cc(1, FILE_SELECT_DATA.unk_39))
             {
-                DmaTransfer(3, (void*)sEwramPointer + 0x3600, VRAM_BASE + 0xE000, 0x300, 16);
+                DMATransfer(3, (void*)sEwramPointer + 0x3600, VRAM_BASE + 0xE000, 0x300, 16);
                 break;
             }
             ended = FALSE;
             break;
 
-        case TILEMAP_REQUEST_35:
+        case 0x23:
             FILE_SELECT_DATA.dispcnt &= ~DCNT_BG0;
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_0].oamId = 0;
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_0].exists = FALSE;
+            FILE_SELECT_DATA.fileScreenOam[0].oamID = 0;
+            FILE_SELECT_DATA.fileScreenOam[0].exists = FALSE;
 
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamId = FILE_SELECT_OAM_ID_LARGE_PANEL_CLOSE;
+            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID = FILE_SELECT_OAM_ID_LARGE_PANEL + 1;
             FileSelectPlayMenuSound(MENU_SOUND_REQUEST_CLOSE_SUB_MENU);
             break;
 
-        case TILEMAP_REQUEST_37:
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_0].oamId = 0;
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_0].exists = FALSE;
+        case 0x25:
+            FILE_SELECT_DATA.fileScreenOam[0].oamID = 0;
+            FILE_SELECT_DATA.fileScreenOam[0].exists = FALSE;
 
-            DmaTransfer(3, (void*)sEwramPointer + 0x3300, VRAM_BASE + 0xE000, 0x300, 16);
+            DMATransfer(3, (void*)sEwramPointer + 0x3300, VRAM_BASE + 0xE000, 0x300, 16);
             break;
 
-        case TILEMAP_REQUEST_38:
-            SoundPlay(SOUND_OPEN_SUB_MENU);
+        case 0x26:
+            SoundPlay(0x1FD);
 
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].xPosition = BLOCK_SIZE * 5;
             FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].yPosition = BLOCK_SIZE * 2 + HALF_BLOCK_SIZE;
-            UpdateMenuOamDataId(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL], FILE_SELECT_OAM_ID_MEDIUM_PANEL_OPEN);
+            UpdateMenuOamDataID(&FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL], FILE_SELECT_OAM_ID_MEDIUM_PANEL);
 
-            gBg0HOFS_NonGameplay = BLOCK_SIZE * 29 + HALF_BLOCK_SIZE;
-            gBg0VOFS_NonGameplay = BLOCK_SIZE * 29 + HALF_BLOCK_SIZE;
+            gBG0HOFS_NonGameplay = BLOCK_SIZE * 29 + HALF_BLOCK_SIZE;
+            gBG0VOFS_NonGameplay = BLOCK_SIZE * 29 + HALF_BLOCK_SIZE;
 
-            if (FILE_SELECT_DATA.corruptFile == 1)
-                DmaTransfer(3, (void*)sEwramPointer + 0x4200, VRAM_BASE + 0xE000, 0x300, 16);
-            else if (FILE_SELECT_DATA.corruptFile == 2)
-                DmaTransfer(3, (void*)sEwramPointer + 0x4500, VRAM_BASE + 0xE000, 0x300, 16);
+            if (FILE_SELECT_DATA.unk_47 == 1)
+                DMATransfer(3, (void*)sEwramPointer + 0x4200, VRAM_BASE + 0xE000, 0x300, 16);
+            else if (FILE_SELECT_DATA.unk_47 == 2)
+                DMATransfer(3, (void*)sEwramPointer + 0x4500, VRAM_BASE + 0xE000, 0x300, 16);
             else
-                DmaTransfer(3, (void*)sEwramPointer + 0x3F00, VRAM_BASE + 0xE000, 0x300, 16);
+                DMATransfer(3, (void*)sEwramPointer + 0x3F00, VRAM_BASE + 0xE000, 0x300, 16);
             break;
 
-        case TILEMAP_REQUEST_39:
+        case 0x27:
             if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].ended)
             {
                 FILE_SELECT_DATA.bg0cnt = FILE_SELECT_DATA.unk_1E;
@@ -6904,18 +6919,41 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
             ended = FALSE;
             break;
 
-        case TILEMAP_REQUEST_40:
-            SoundPlay(SOUND_CLOSE_SUB_MENU);
+        case 0x28:
+            SoundPlay(0x1FE);
             FILE_SELECT_DATA.dispcnt &= ~DCNT_BG0;
-            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamId = FILE_SELECT_OAM_ID_MEDIUM_PANEL_CLOSE;
+            FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID = FILE_SELECT_OAM_ID_MEDIUM_PANEL + 1;
             break;
 
-        case TILEMAP_REQUEST_5:
+        /* Keep these identical case bodies separate: merging the labels
+         * changes agbcc's allocation of the function's saved registers.
+         */
+        case 5:
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID != 0)
+                ended = FALSE;
+            else
+                ended = TRUE;
+            break;
         case TILEMAP_REQUEST_DIFFICULTY_DESPAWN:
-        case TILEMAP_REQUEST_32:
-        case TILEMAP_REQUEST_36:
-        case TILEMAP_REQUEST_41:
-            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamId != 0)
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID != 0)
+                ended = FALSE;
+            else
+                ended = TRUE;
+            break;
+        case 0x20:
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID != 0)
+                ended = FALSE;
+            else
+                ended = TRUE;
+            break;
+        case 0x24:
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID != 0)
+                ended = FALSE;
+            else
+                ended = TRUE;
+            break;
+        case 0x29:
+            if (FILE_SELECT_DATA.fileScreenOam[FILE_SELECT_OAM_MEDIUM_PANEL].oamID != 0)
                 ended = FALSE;
             else
                 ended = TRUE;
@@ -6924,960 +6962,6 @@ static u32 FileSelectUpdateTilemap(TilemapRequest request)
 
     return ended;
 }
-#else
-NAKED_FUNCTION
-static u32 FileSelectUpdateTilemap(TilemapRequest request)
-{
-    asm(" \n\
-    push {r4, r5, r6, r7, lr} \n\
-    mov r7, r8 \n\
-    push {r7} \n\
-    sub sp, #4 \n\
-    lsl r0, r0, #0x18 \n\
-    lsr r0, r0, #0x18 \n\
-    movs r6, #1 \n\
-    cmp r0, #0x29 \n\
-    bls lbl_0807e6ee \n\
-    bl lbl_0807eec8 \n\
-lbl_0807e6ee: \n\
-    lsl r0, r0, #2 \n\
-    ldr r1, lbl_0807e6f8 @ =lbl_0807e6fc \n\
-    add r0, r0, r1 \n\
-    ldr r0, [r0] \n\
-    mov pc, r0 \n\
-    .align 2, 0 \n\
-lbl_0807e6f8: .4byte lbl_0807e6fc \n\
-lbl_0807e6fc: @ jump table \n\
-    .4byte lbl_0807e7a4 @ case 0 \n\
-    .4byte lbl_0807e800 @ case 1 \n\
-    .4byte lbl_0807e838 @ case 2 \n\
-    .4byte lbl_0807e888 @ case 3 \n\
-    .4byte lbl_0807e8b0 @ case 4 \n\
-    .4byte lbl_0807eeb8 @ case 5 \n\
-    .4byte lbl_0807e8cc @ case 6 \n\
-    .4byte lbl_0807e910 @ case 7 \n\
-    .4byte lbl_0807e96c @ case 8 \n\
-    .4byte lbl_0807eeb8 @ case 9 \n\
-    .4byte lbl_0807e988 @ case 10 \n\
-    .4byte lbl_0807ea0c @ case 11 \n\
-    .4byte lbl_0807ea44 @ case 12 \n\
-    .4byte lbl_0807eb98 @ case 13 \n\
-    .4byte lbl_0807ea64 @ case 14 \n\
-    .4byte lbl_0807ea90 @ case 15 \n\
-    .4byte lbl_0807eaa0 @ case 16 \n\
-    .4byte lbl_0807ebd0 @ case 17 \n\
-    .4byte lbl_0807eabc @ case 18 \n\
-    .4byte lbl_0807eb40 @ case 19 \n\
-    .4byte lbl_0807eb78 @ case 20 \n\
-    .4byte lbl_0807eb98 @ case 21 \n\
-    .4byte lbl_0807ebe4 @ case 22 \n\
-    .4byte lbl_0807ec10 @ case 23 \n\
-    .4byte lbl_0807ec40 @ case 24 \n\
-    .4byte lbl_0807ebd0 @ case 25 \n\
-    .4byte lbl_0807ec5c @ case 26 \n\
-    .4byte lbl_0807ec74 @ case 27 \n\
-    .4byte lbl_0807ec8c @ case 28 \n\
-    .4byte lbl_0807eca4 @ case 29 \n\
-    .4byte lbl_0807ecf4 @ case 30 \n\
-    .4byte lbl_0807ed34 @ case 31 \n\
-    .4byte lbl_0807eeb8 @ case 32 \n\
-    .4byte lbl_0807eec8 @ case 33 \n\
-    .4byte lbl_0807ed50 @ case 34 \n\
-    .4byte lbl_0807ed78 @ case 35 \n\
-    .4byte lbl_0807eeb8 @ case 36 \n\
-    .4byte lbl_0807edb0 @ case 37 \n\
-    .4byte lbl_0807eddc @ case 38 \n\
-    .4byte lbl_0807ee6c @ case 39 \n\
-    .4byte lbl_0807ee94 @ case 40 \n\
-    .4byte lbl_0807eeb8 @ case 41 \n\
-lbl_0807e7a4: \n\
-    ldr r0, lbl_0807e7ec @ =sNonGameplayRamPointer \n\
-    ldr r2, [r0] \n\
-    movs r0, #0x93 \n\
-    lsl r0, r0, #1 \n\
-    add r1, r2, r0 \n\
-    sub r0, #0x26 \n\
-    strh r0, [r1] \n\
-    movs r1, #0x92 \n\
-    lsl r1, r1, #1 \n\
-    add r0, r2, r1 \n\
-    movs r1, #0x80 \n\
-    strh r1, [r0] \n\
-    movs r1, #0x22 \n\
-    bl UpdateMenuOamDataId \n\
-    movs r0, #5 \n\
-    bl FileSelectPlayMenuSound \n\
-    ldr r1, lbl_0807e7f0 @ =gBg1HOFS_NonGameplay \n\
-    movs r2, #0xf8 \n\
-    lsl r2, r2, #3 \n\
-    add r0, r2, #0 \n\
-    strh r0, [r1] \n\
-    ldr r1, lbl_0807e7f4 @ =gBg1VOFS_NonGameplay \n\
-    movs r3, #0xed \n\
-    lsl r3, r3, #3 \n\
-    add r0, r3, #0 \n\
-    strh r0, [r1] \n\
-    ldr r0, lbl_0807e7f8 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r0, #0xc0 \n\
-    lsl r0, r0, #6 \n\
-    add r1, r1, r0 \n\
-    ldr r2, lbl_0807e7fc @ =0x0600e800 \n\
-    b lbl_0807ee54 \n\
-    .align 2, 0 \n\
-lbl_0807e7ec: .4byte sNonGameplayRamPointer \n\
-lbl_0807e7f0: .4byte gBg1HOFS_NonGameplay \n\
-lbl_0807e7f4: .4byte gBg1VOFS_NonGameplay \n\
-lbl_0807e7f8: .4byte sEwramPointer \n\
-lbl_0807e7fc: .4byte 0x0600e800 \n\
-lbl_0807e800: \n\
-    ldr r4, lbl_0807e830 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    ldr r1, lbl_0807e834 @ =0x0000012f \n\
-    add r0, r0, r1 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0x10 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    bne lbl_0807e814 \n\
-    b lbl_0807eec6 \n\
-lbl_0807e814: \n\
-    movs r0, #1 \n\
-    movs r1, #0 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    bne lbl_0807e822 \n\
-    b lbl_0807eec6 \n\
-lbl_0807e822: \n\
-    ldr r0, [r4] \n\
-    movs r1, #0 \n\
-    strh r1, [r0, #2] \n\
-    ldrh r1, [r0, #0x1c] \n\
-    strh r1, [r0, #6] \n\
-    b lbl_0807eec8 \n\
-    .align 2, 0 \n\
-lbl_0807e830: .4byte sNonGameplayRamPointer \n\
-lbl_0807e834: .4byte 0x0000012f \n\
-lbl_0807e838: \n\
-    ldr r0, lbl_0807e878 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r0] \n\
-    add r2, r0, #0 \n\
-    add r2, #0xb6 \n\
-    movs r1, #0xa0 \n\
-    lsl r1, r1, #1 \n\
-    strh r1, [r2] \n\
-    add r0, #0xb4 \n\
-    movs r1, #0xa0 \n\
-    strh r1, [r0] \n\
-    movs r1, #0x26 \n\
-    bl UpdateMenuOamDataId \n\
-    movs r0, #5 \n\
-    bl FileSelectPlayMenuSound \n\
-    ldr r1, lbl_0807e87c @ =gBg0HOFS_NonGameplay \n\
-    movs r2, #0xe0 \n\
-    lsl r2, r2, #3 \n\
-    add r0, r2, #0 \n\
-    strh r0, [r1] \n\
-    ldr r1, lbl_0807e880 @ =gBg0VOFS_NonGameplay \n\
-    movs r3, #0xe4 \n\
-    lsl r3, r3, #3 \n\
-    add r0, r3, #0 \n\
-    strh r0, [r1] \n\
-    ldr r0, lbl_0807e884 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r0, #0xe4 \n\
-    lsl r0, r0, #6 \n\
-    add r1, r1, r0 \n\
-    b lbl_0807ee52 \n\
-    .align 2, 0 \n\
-lbl_0807e878: .4byte sNonGameplayRamPointer \n\
-lbl_0807e87c: .4byte gBg0HOFS_NonGameplay \n\
-lbl_0807e880: .4byte gBg0VOFS_NonGameplay \n\
-lbl_0807e884: .4byte sEwramPointer \n\
-lbl_0807e888: \n\
-    ldr r4, lbl_0807e8ac @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    add r0, #0xbf \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0x10 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    bne lbl_0807e89a \n\
-    b lbl_0807eec6 \n\
-lbl_0807e89a: \n\
-    movs r0, #1 \n\
-    movs r1, #0x11 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    beq lbl_0807e8a8 \n\
-    b lbl_0807ed1a \n\
-lbl_0807e8a8: \n\
-    b lbl_0807eec6 \n\
-    .align 2, 0 \n\
-lbl_0807e8ac: .4byte sNonGameplayRamPointer \n\
-lbl_0807e8b0: \n\
-    ldr r0, lbl_0807e8c4 @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    ldrh r2, [r1] \n\
-    ldr r0, lbl_0807e8c8 @ =0x0000feff \n\
-    and r0, r2 \n\
-    strh r0, [r1] \n\
-    add r1, #0xbe \n\
-    movs r0, #0x27 \n\
-    strb r0, [r1] \n\
-    b lbl_0807ed9e \n\
-    .align 2, 0 \n\
-lbl_0807e8c4: .4byte sNonGameplayRamPointer \n\
-lbl_0807e8c8: .4byte 0x0000feff \n\
-lbl_0807e8cc: \n\
-    ldr r0, lbl_0807e904 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r0] \n\
-    add r2, r0, #0 \n\
-    add r2, #0xb6 \n\
-    movs r1, #0xa0 \n\
-    lsl r1, r1, #1 \n\
-    strh r1, [r2] \n\
-    add r0, #0xb4 \n\
-    movs r1, #0xc0 \n\
-    strh r1, [r0] \n\
-    movs r1, #0x24 \n\
-    bl UpdateMenuOamDataId \n\
-    movs r0, #5 \n\
-    bl FileSelectPlayMenuSound \n\
-    ldr r1, lbl_0807e908 @ =gBg0HOFS_NonGameplay \n\
-    movs r2, #0xe0 \n\
-    lsl r2, r2, #3 \n\
-    add r0, r2, #0 \n\
-    strh r0, [r1] \n\
-    ldr r1, lbl_0807e90c @ =gBg0VOFS_NonGameplay \n\
-    movs r3, #0xe4 \n\
-    lsl r3, r3, #3 \n\
-    add r0, r3, #0 \n\
-    strh r0, [r1] \n\
-    b lbl_0807eec8 \n\
-    .align 2, 0 \n\
-lbl_0807e904: .4byte sNonGameplayRamPointer \n\
-lbl_0807e908: .4byte gBg0HOFS_NonGameplay \n\
-lbl_0807e90c: .4byte gBg0VOFS_NonGameplay \n\
-lbl_0807e910: \n\
-    ldr r0, lbl_0807e960 @ =sNonGameplayRamPointer \n\
-    mov r8, r0 \n\
-    ldr r2, [r0] \n\
-    add r0, r2, #0 \n\
-    add r0, #0xbf \n\
-    ldrb r1, [r0] \n\
-    movs r7, #0x10 \n\
-    add r0, r7, #0 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    bne lbl_0807e928 \n\
-    b lbl_0807eec6 \n\
-lbl_0807e928: \n\
-    add r0, r2, #0 \n\
-    add r0, #0x38 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #1 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    bne lbl_0807e93a \n\
-    b lbl_0807eec6 \n\
-lbl_0807e93a: \n\
-    ldr r5, lbl_0807e964 @ =sEwramPointer \n\
-    ldr r0, [r5] \n\
-    movs r4, #0xf0 \n\
-    lsl r4, r4, #6 \n\
-    add r0, r0, r4 \n\
-    bl unk_7eedc \n\
-    ldr r1, [r5] \n\
-    add r1, r1, r4 \n\
-    ldr r2, lbl_0807e968 @ =0x0600e000 \n\
-    movs r3, #0xc0 \n\
-    lsl r3, r3, #2 \n\
-    str r7, [sp] \n\
-    movs r0, #3 \n\
-    bl DmaTransfer \n\
-    mov r2, r8 \n\
-    ldr r1, [r2] \n\
-    b lbl_0807ed1c \n\
-    .align 2, 0 \n\
-lbl_0807e960: .4byte sNonGameplayRamPointer \n\
-lbl_0807e964: .4byte sEwramPointer \n\
-lbl_0807e968: .4byte 0x0600e000 \n\
-lbl_0807e96c: \n\
-    ldr r0, lbl_0807e980 @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    ldrh r2, [r1] \n\
-    ldr r0, lbl_0807e984 @ =0x0000feff \n\
-    and r0, r2 \n\
-    strh r0, [r1] \n\
-    add r1, #0xbe \n\
-    movs r0, #0x25 \n\
-    strb r0, [r1] \n\
-    b lbl_0807ed9e \n\
-    .align 2, 0 \n\
-lbl_0807e980: .4byte sNonGameplayRamPointer \n\
-lbl_0807e984: .4byte 0x0000feff \n\
-lbl_0807e988: \n\
-    ldr r4, lbl_0807e9f4 @ =sNonGameplayRamPointer \n\
-    ldr r2, [r4] \n\
-    movs r0, #0x93 \n\
-    lsl r0, r0, #1 \n\
-    add r1, r2, r0 \n\
-    add r0, #0x1a \n\
-    strh r0, [r1] \n\
-    movs r1, #0x92 \n\
-    lsl r1, r1, #1 \n\
-    add r0, r2, r1 \n\
-    movs r1, #0xa0 \n\
-    strh r1, [r0] \n\
-    movs r1, #0x26 \n\
-    bl UpdateMenuOamDataId \n\
-    movs r0, #5 \n\
-    bl FileSelectPlayMenuSound \n\
-    ldr r1, lbl_0807e9f8 @ =gBg1HOFS_NonGameplay \n\
-    movs r2, #0xd9 \n\
-    lsl r2, r2, #3 \n\
-    add r0, r2, #0 \n\
-    strh r0, [r1] \n\
-    ldr r1, lbl_0807e9fc @ =gBg1VOFS_NonGameplay \n\
-    movs r3, #0xd5 \n\
-    lsl r3, r3, #3 \n\
-    add r0, r3, #0 \n\
-    strh r0, [r1] \n\
-    ldr r0, lbl_0807ea00 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r0, #0xfc \n\
-    lsl r0, r0, #6 \n\
-    add r1, r1, r0 \n\
-    ldr r2, lbl_0807ea04 @ =0x0600e800 \n\
-    movs r3, #0xc0 \n\
-    lsl r3, r3, #2 \n\
-    movs r0, #0x10 \n\
-    str r0, [sp] \n\
-    movs r0, #3 \n\
-    bl DmaTransfer \n\
-    ldr r2, [r4] \n\
-    ldrh r0, [r2, #0x1c] \n\
-    strh r0, [r2, #6] \n\
-    ldrh r1, [r2] \n\
-    ldr r0, lbl_0807ea08 @ =0x0000fdff \n\
-    and r0, r1 \n\
-    ldrh r1, [r2, #0x1a] \n\
-    strh r1, [r2, #8] \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #3 \n\
-    add r1, r3, #0 \n\
-    b lbl_0807ee8a \n\
-    .align 2, 0 \n\
-lbl_0807e9f4: .4byte sNonGameplayRamPointer \n\
-lbl_0807e9f8: .4byte gBg1HOFS_NonGameplay \n\
-lbl_0807e9fc: .4byte gBg1VOFS_NonGameplay \n\
-lbl_0807ea00: .4byte sEwramPointer \n\
-lbl_0807ea04: .4byte 0x0600e800 \n\
-lbl_0807ea08: .4byte 0x0000fdff \n\
-lbl_0807ea0c: \n\
-    ldr r4, lbl_0807ea3c @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    ldr r1, lbl_0807ea40 @ =0x0000012f \n\
-    add r0, r0, r1 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0x10 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    bne lbl_0807ea20 \n\
-    b lbl_0807eec6 \n\
-lbl_0807ea20: \n\
-    movs r0, #1 \n\
-    movs r1, #5 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    bne lbl_0807ea2e \n\
-    b lbl_0807eec6 \n\
-lbl_0807ea2e: \n\
-    ldr r1, [r4] \n\
-    ldrh r0, [r1, #0x1c] \n\
-    strh r0, [r1, #6] \n\
-    ldrh r2, [r1] \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #2 \n\
-    b lbl_0807ed26 \n\
-    .align 2, 0 \n\
-lbl_0807ea3c: .4byte sNonGameplayRamPointer \n\
-lbl_0807ea40: .4byte 0x0000012f \n\
-lbl_0807ea44: \n\
-    ldr r0, lbl_0807ea5c @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    ldrh r2, [r1] \n\
-    ldr r0, lbl_0807ea60 @ =0x0000fdff \n\
-    and r0, r2 \n\
-    strh r0, [r1] \n\
-    movs r0, #0x97 \n\
-    lsl r0, r0, #1 \n\
-    add r1, r1, r0 \n\
-    movs r0, #0x27 \n\
-    strb r0, [r1] \n\
-    b lbl_0807ed9e \n\
-    .align 2, 0 \n\
-lbl_0807ea5c: .4byte sNonGameplayRamPointer \n\
-lbl_0807ea60: .4byte 0x0000fdff \n\
-lbl_0807ea64: \n\
-    ldr r1, lbl_0807ea84 @ =gBg0HOFS_NonGameplay \n\
-    movs r3, #0xd9 \n\
-    lsl r3, r3, #3 \n\
-    add r0, r3, #0 \n\
-    strh r0, [r1] \n\
-    ldr r1, lbl_0807ea88 @ =gBg0VOFS_NonGameplay \n\
-    movs r2, #0xd5 \n\
-    lsl r2, r2, #3 \n\
-    add r0, r2, #0 \n\
-    strh r0, [r1] \n\
-    ldr r0, lbl_0807ea8c @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r3, #0x84 \n\
-    lsl r3, r3, #7 \n\
-    b lbl_0807ee50 \n\
-    .align 2, 0 \n\
-lbl_0807ea84: .4byte gBg0HOFS_NonGameplay \n\
-lbl_0807ea88: .4byte gBg0VOFS_NonGameplay \n\
-lbl_0807ea8c: .4byte sEwramPointer \n\
-lbl_0807ea90: \n\
-    movs r0, #1 \n\
-    movs r1, #6 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    beq lbl_0807ea9e \n\
-    b lbl_0807ec1e \n\
-lbl_0807ea9e: \n\
-    b lbl_0807eec6 \n\
-lbl_0807eaa0: \n\
-    ldr r0, lbl_0807eab4 @ =sNonGameplayRamPointer \n\
-    ldr r2, [r0] \n\
-    ldrh r1, [r2] \n\
-    ldr r0, lbl_0807eab8 @ =0x0000feff \n\
-    and r0, r1 \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #2 \n\
-    add r1, r3, #0 \n\
-    b lbl_0807ee8a \n\
-    .align 2, 0 \n\
-lbl_0807eab4: .4byte sNonGameplayRamPointer \n\
-lbl_0807eab8: .4byte 0x0000feff \n\
-lbl_0807eabc: \n\
-    ldr r4, lbl_0807eb28 @ =sNonGameplayRamPointer \n\
-    ldr r2, [r4] \n\
-    movs r0, #0x93 \n\
-    lsl r0, r0, #1 \n\
-    add r1, r2, r0 \n\
-    add r0, #0x1a \n\
-    strh r0, [r1] \n\
-    movs r1, #0x92 \n\
-    lsl r1, r1, #1 \n\
-    add r0, r2, r1 \n\
-    movs r1, #0xa0 \n\
-    strh r1, [r0] \n\
-    movs r1, #0x26 \n\
-    bl UpdateMenuOamDataId \n\
-    movs r0, #5 \n\
-    bl FileSelectPlayMenuSound \n\
-    ldr r1, lbl_0807eb2c @ =gBg1HOFS_NonGameplay \n\
-    movs r2, #0xd9 \n\
-    lsl r2, r2, #3 \n\
-    add r0, r2, #0 \n\
-    strh r0, [r1] \n\
-    ldr r1, lbl_0807eb30 @ =gBg1VOFS_NonGameplay \n\
-    movs r3, #0xd5 \n\
-    lsl r3, r3, #3 \n\
-    add r0, r3, #0 \n\
-    strh r0, [r1] \n\
-    ldr r0, lbl_0807eb34 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r0, #0xfc \n\
-    lsl r0, r0, #6 \n\
-    add r1, r1, r0 \n\
-    ldr r2, lbl_0807eb38 @ =0x0600e800 \n\
-    movs r3, #0xc0 \n\
-    lsl r3, r3, #2 \n\
-    movs r0, #0x10 \n\
-    str r0, [sp] \n\
-    movs r0, #3 \n\
-    bl DmaTransfer \n\
-    ldr r2, [r4] \n\
-    ldrh r0, [r2, #0x1c] \n\
-    strh r0, [r2, #6] \n\
-    ldrh r1, [r2] \n\
-    ldr r0, lbl_0807eb3c @ =0x0000fdff \n\
-    and r0, r1 \n\
-    ldrh r1, [r2, #0x1a] \n\
-    strh r1, [r2, #8] \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #3 \n\
-    add r1, r3, #0 \n\
-    b lbl_0807ee8a \n\
-    .align 2, 0 \n\
-lbl_0807eb28: .4byte sNonGameplayRamPointer \n\
-lbl_0807eb2c: .4byte gBg1HOFS_NonGameplay \n\
-lbl_0807eb30: .4byte gBg1VOFS_NonGameplay \n\
-lbl_0807eb34: .4byte sEwramPointer \n\
-lbl_0807eb38: .4byte 0x0600e800 \n\
-lbl_0807eb3c: .4byte 0x0000fdff \n\
-lbl_0807eb40: \n\
-    ldr r4, lbl_0807eb70 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    ldr r1, lbl_0807eb74 @ =0x0000012f \n\
-    add r0, r0, r1 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0x10 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    bne lbl_0807eb54 \n\
-    b lbl_0807eec6 \n\
-lbl_0807eb54: \n\
-    movs r0, #1 \n\
-    movs r1, #1 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    bne lbl_0807eb62 \n\
-    b lbl_0807eec6 \n\
-lbl_0807eb62: \n\
-    ldr r1, [r4] \n\
-    ldrh r0, [r1, #0x1c] \n\
-    strh r0, [r1, #6] \n\
-    ldrh r2, [r1] \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #2 \n\
-    b lbl_0807ed26 \n\
-    .align 2, 0 \n\
-lbl_0807eb70: .4byte sNonGameplayRamPointer \n\
-lbl_0807eb74: .4byte 0x0000012f \n\
-lbl_0807eb78: \n\
-    ldr r0, lbl_0807eb90 @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    ldrh r2, [r1] \n\
-    ldr r0, lbl_0807eb94 @ =0x0000fdff \n\
-    and r0, r2 \n\
-    strh r0, [r1] \n\
-    movs r0, #0x97 \n\
-    lsl r0, r0, #1 \n\
-    add r1, r1, r0 \n\
-    movs r0, #0x27 \n\
-    strb r0, [r1] \n\
-    b lbl_0807ed9e \n\
-    .align 2, 0 \n\
-lbl_0807eb90: .4byte sNonGameplayRamPointer \n\
-lbl_0807eb94: .4byte 0x0000fdff \n\
-lbl_0807eb98: \n\
-    ldr r0, lbl_0807ebd4 @ =sNonGameplayRamPointer \n\
-    ldr r2, [r0] \n\
-    movs r1, #0x97 \n\
-    lsl r1, r1, #1 \n\
-    add r0, r2, r1 \n\
-    ldrb r0, [r0] \n\
-    cmp r0, #0 \n\
-    beq lbl_0807ebaa \n\
-    b lbl_0807eec6 \n\
-lbl_0807ebaa: \n\
-    ldrh r0, [r2, #0x18] \n\
-    strh r0, [r2, #6] \n\
-    ldrh r0, [r2, #0x16] \n\
-    strh r0, [r2, #8] \n\
-    ldrh r1, [r2] \n\
-    ldr r0, lbl_0807ebd8 @ =0x0000fbff \n\
-    and r0, r1 \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #2 \n\
-    add r1, r3, #0 \n\
-    orr r0, r1 \n\
-    strh r0, [r2] \n\
-    ldr r0, lbl_0807ebdc @ =gBg1HOFS_NonGameplay \n\
-    movs r2, #0x80 \n\
-    lsl r2, r2, #4 \n\
-    add r1, r2, #0 \n\
-    strh r1, [r0] \n\
-    ldr r0, lbl_0807ebe0 @ =gBg1VOFS_NonGameplay \n\
-    strh r1, [r0] \n\
-lbl_0807ebd0: \n\
-    movs r6, #1 \n\
-    b lbl_0807eec8 \n\
-    .align 2, 0 \n\
-lbl_0807ebd4: .4byte sNonGameplayRamPointer \n\
-lbl_0807ebd8: .4byte 0x0000fbff \n\
-lbl_0807ebdc: .4byte gBg1HOFS_NonGameplay \n\
-lbl_0807ebe0: .4byte gBg1VOFS_NonGameplay \n\
-lbl_0807ebe4: \n\
-    ldr r1, lbl_0807ec04 @ =gBg0HOFS_NonGameplay \n\
-    movs r3, #0xd9 \n\
-    lsl r3, r3, #3 \n\
-    add r0, r3, #0 \n\
-    strh r0, [r1] \n\
-    ldr r1, lbl_0807ec08 @ =gBg0VOFS_NonGameplay \n\
-    movs r2, #0xd5 \n\
-    lsl r2, r2, #3 \n\
-    add r0, r2, #0 \n\
-    strh r0, [r1] \n\
-    ldr r0, lbl_0807ec0c @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r3, #0x84 \n\
-    lsl r3, r3, #7 \n\
-    b lbl_0807ee50 \n\
-    .align 2, 0 \n\
-lbl_0807ec04: .4byte gBg0HOFS_NonGameplay \n\
-lbl_0807ec08: .4byte gBg0VOFS_NonGameplay \n\
-lbl_0807ec0c: .4byte sEwramPointer \n\
-lbl_0807ec10: \n\
-    movs r0, #1 \n\
-    movs r1, #3 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    bne lbl_0807ec1e \n\
-    b lbl_0807eec6 \n\
-lbl_0807ec1e: \n\
-    ldr r0, lbl_0807ec38 @ =sNonGameplayRamPointer \n\
-    ldr r2, [r0] \n\
-    ldrh r0, [r2, #0x1e] \n\
-    strh r0, [r2, #4] \n\
-    ldrh r1, [r2] \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #1 \n\
-    add r0, r3, #0 \n\
-    orr r0, r1 \n\
-    ldr r1, lbl_0807ec3c @ =0x0000fdff \n\
-    and r0, r1 \n\
-    strh r0, [r2] \n\
-    b lbl_0807eec8 \n\
-    .align 2, 0 \n\
-lbl_0807ec38: .4byte sNonGameplayRamPointer \n\
-lbl_0807ec3c: .4byte 0x0000fdff \n\
-lbl_0807ec40: \n\
-    ldr r0, lbl_0807ec54 @ =sNonGameplayRamPointer \n\
-    ldr r2, [r0] \n\
-    ldrh r1, [r2] \n\
-    ldr r0, lbl_0807ec58 @ =0x0000feff \n\
-    and r0, r1 \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #2 \n\
-    add r1, r3, #0 \n\
-    b lbl_0807ee8a \n\
-    .align 2, 0 \n\
-lbl_0807ec54: .4byte sNonGameplayRamPointer \n\
-lbl_0807ec58: .4byte 0x0000feff \n\
-lbl_0807ec5c: \n\
-    ldr r0, lbl_0807ec6c @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r0, #0xfc \n\
-    lsl r0, r0, #6 \n\
-    add r1, r1, r0 \n\
-    ldr r2, lbl_0807ec70 @ =0x0600e800 \n\
-    b lbl_0807ee54 \n\
-    .align 2, 0 \n\
-lbl_0807ec6c: .4byte sEwramPointer \n\
-lbl_0807ec70: .4byte 0x0600e800 \n\
-lbl_0807ec74: \n\
-    ldr r0, lbl_0807ec84 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r2, #0x8a \n\
-    lsl r2, r2, #7 \n\
-    add r1, r1, r2 \n\
-    ldr r2, lbl_0807ec88 @ =0x0600e800 \n\
-    b lbl_0807ee54 \n\
-    .align 2, 0 \n\
-lbl_0807ec84: .4byte sEwramPointer \n\
-lbl_0807ec88: .4byte 0x0600e800 \n\
-lbl_0807ec8c: \n\
-    ldr r0, lbl_0807ec9c @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r3, #0x84 \n\
-    lsl r3, r3, #7 \n\
-    add r1, r1, r3 \n\
-    ldr r2, lbl_0807eca0 @ =0x0600e800 \n\
-    b lbl_0807ee54 \n\
-    .align 2, 0 \n\
-lbl_0807ec9c: .4byte sEwramPointer \n\
-lbl_0807eca0: .4byte 0x0600e800 \n\
-lbl_0807eca4: \n\
-    ldr r0, lbl_0807ece4 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r0] \n\
-    add r2, r0, #0 \n\
-    add r2, #0xb6 \n\
-    movs r1, #0xa0 \n\
-    lsl r1, r1, #1 \n\
-    strh r1, [r2] \n\
-    add r0, #0xb4 \n\
-    movs r1, #0xc0 \n\
-    strh r1, [r0] \n\
-    movs r1, #0x24 \n\
-    bl UpdateMenuOamDataId \n\
-    movs r0, #5 \n\
-    bl FileSelectPlayMenuSound \n\
-    ldr r1, lbl_0807ece8 @ =gBg0HOFS_NonGameplay \n\
-    movs r2, #0xe0 \n\
-    lsl r2, r2, #3 \n\
-    add r0, r2, #0 \n\
-    strh r0, [r1] \n\
-    ldr r1, lbl_0807ecec @ =gBg0VOFS_NonGameplay \n\
-    movs r3, #0xe4 \n\
-    lsl r3, r3, #3 \n\
-    add r0, r3, #0 \n\
-    strh r0, [r1] \n\
-    ldr r0, lbl_0807ecf0 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r0, #0xcc \n\
-    lsl r0, r0, #6 \n\
-    add r1, r1, r0 \n\
-    b lbl_0807ee52 \n\
-    .align 2, 0 \n\
-lbl_0807ece4: .4byte sNonGameplayRamPointer \n\
-lbl_0807ece8: .4byte gBg0HOFS_NonGameplay \n\
-lbl_0807ecec: .4byte gBg0VOFS_NonGameplay \n\
-lbl_0807ecf0: .4byte sEwramPointer \n\
-lbl_0807ecf4: \n\
-    ldr r4, lbl_0807ed30 @ =sNonGameplayRamPointer \n\
-    ldr r2, [r4] \n\
-    add r0, r2, #0 \n\
-    add r0, #0xbf \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0x10 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    bne lbl_0807ed08 \n\
-    b lbl_0807eec6 \n\
-lbl_0807ed08: \n\
-    add r0, r2, #0 \n\
-    add r0, #0x39 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #1 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    bne lbl_0807ed1a \n\
-    b lbl_0807eec6 \n\
-lbl_0807ed1a: \n\
-    ldr r1, [r4] \n\
-lbl_0807ed1c: \n\
-    ldrh r0, [r1, #0x1e] \n\
-    strh r0, [r1, #4] \n\
-    ldrh r2, [r1] \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #1 \n\
-lbl_0807ed26: \n\
-    add r0, r3, #0 \n\
-    orr r0, r2 \n\
-    strh r0, [r1] \n\
-    b lbl_0807eec8 \n\
-    .align 2, 0 \n\
-lbl_0807ed30: .4byte sNonGameplayRamPointer \n\
-lbl_0807ed34: \n\
-    ldr r0, lbl_0807ed48 @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    ldrh r2, [r1] \n\
-    ldr r0, lbl_0807ed4c @ =0x0000feff \n\
-    and r0, r2 \n\
-    strh r0, [r1] \n\
-    add r1, #0xbe \n\
-    movs r0, #0x25 \n\
-    strb r0, [r1] \n\
-    b lbl_0807ed9e \n\
-    .align 2, 0 \n\
-lbl_0807ed48: .4byte sNonGameplayRamPointer \n\
-lbl_0807ed4c: .4byte 0x0000feff \n\
-lbl_0807ed50: \n\
-    ldr r0, lbl_0807ed70 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r0] \n\
-    add r0, #0x39 \n\
-    ldrb r1, [r0] \n\
-    movs r0, #1 \n\
-    bl FileScreenUpdateMessageInfoIdQueue \n\
-    cmp r0, #0 \n\
-    bne lbl_0807ed64 \n\
-    b lbl_0807eec6 \n\
-lbl_0807ed64: \n\
-    ldr r0, lbl_0807ed74 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r0, #0xd8 \n\
-    lsl r0, r0, #6 \n\
-    add r1, r1, r0 \n\
-    b lbl_0807ee52 \n\
-    .align 2, 0 \n\
-lbl_0807ed70: .4byte sNonGameplayRamPointer \n\
-lbl_0807ed74: .4byte sEwramPointer \n\
-lbl_0807ed78: \n\
-    ldr r3, lbl_0807eda8 @ =sNonGameplayRamPointer \n\
-    ldr r1, [r3] \n\
-    ldrh r2, [r1] \n\
-    ldr r0, lbl_0807edac @ =0x0000feff \n\
-    and r0, r2 \n\
-    movs r2, #0 \n\
-    strh r0, [r1] \n\
-    add r1, #0x7e \n\
-    strb r2, [r1] \n\
-    ldr r1, [r3] \n\
-    add r1, #0x7f \n\
-    ldrb r2, [r1] \n\
-    movs r0, #0x3f \n\
-    and r0, r2 \n\
-    strb r0, [r1] \n\
-    ldr r0, [r3] \n\
-    add r0, #0xbe \n\
-    movs r1, #0x25 \n\
-    strb r1, [r0] \n\
-lbl_0807ed9e: \n\
-    movs r0, #6 \n\
-    bl FileSelectPlayMenuSound \n\
-    b lbl_0807eec8 \n\
-    .align 2, 0 \n\
-lbl_0807eda8: .4byte sNonGameplayRamPointer \n\
-lbl_0807edac: .4byte 0x0000feff \n\
-lbl_0807edb0: \n\
-    ldr r2, lbl_0807edd4 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r2] \n\
-    add r0, #0x7e \n\
-    movs r1, #0 \n\
-    strb r1, [r0] \n\
-    ldr r1, [r2] \n\
-    add r1, #0x7f \n\
-    ldrb r2, [r1] \n\
-    movs r0, #0x3f \n\
-    and r0, r2 \n\
-    strb r0, [r1] \n\
-    ldr r0, lbl_0807edd8 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r2, #0xcc \n\
-    lsl r2, r2, #6 \n\
-    add r1, r1, r2 \n\
-    b lbl_0807ee52 \n\
-    .align 2, 0 \n\
-lbl_0807edd4: .4byte sNonGameplayRamPointer \n\
-lbl_0807edd8: .4byte sEwramPointer \n\
-lbl_0807eddc: \n\
-    ldr r0, lbl_0807ee20 @ =0x000001fd \n\
-    bl SoundPlay \n\
-    ldr r4, lbl_0807ee24 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r4] \n\
-    add r2, r0, #0 \n\
-    add r2, #0xb6 \n\
-    movs r1, #0xa0 \n\
-    lsl r1, r1, #1 \n\
-    strh r1, [r2] \n\
-    add r0, #0xb4 \n\
-    movs r1, #0xa0 \n\
-    strh r1, [r0] \n\
-    movs r1, #0x26 \n\
-    bl UpdateMenuOamDataId \n\
-    ldr r0, lbl_0807ee28 @ =gBg0HOFS_NonGameplay \n\
-    movs r3, #0xec \n\
-    lsl r3, r3, #3 \n\
-    add r1, r3, #0 \n\
-    strh r1, [r0] \n\
-    ldr r0, lbl_0807ee2c @ =gBg0VOFS_NonGameplay \n\
-    strh r1, [r0] \n\
-    ldr r0, [r4] \n\
-    add r0, #0x47 \n\
-    ldrb r0, [r0] \n\
-    cmp r0, #1 \n\
-    bne lbl_0807ee34 \n\
-    ldr r0, lbl_0807ee30 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r0, #0x84 \n\
-    lsl r0, r0, #7 \n\
-    add r1, r1, r0 \n\
-    b lbl_0807ee52 \n\
-    .align 2, 0 \n\
-lbl_0807ee20: .4byte 0x000001fd \n\
-lbl_0807ee24: .4byte sNonGameplayRamPointer \n\
-lbl_0807ee28: .4byte gBg0HOFS_NonGameplay \n\
-lbl_0807ee2c: .4byte gBg0VOFS_NonGameplay \n\
-lbl_0807ee30: .4byte sEwramPointer \n\
-lbl_0807ee34: \n\
-    cmp r0, #2 \n\
-    bne lbl_0807ee48 \n\
-    ldr r0, lbl_0807ee44 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r2, #0x8a \n\
-    lsl r2, r2, #7 \n\
-    add r1, r1, r2 \n\
-    b lbl_0807ee52 \n\
-    .align 2, 0 \n\
-lbl_0807ee44: .4byte sEwramPointer \n\
-lbl_0807ee48: \n\
-    ldr r0, lbl_0807ee64 @ =sEwramPointer \n\
-    ldr r1, [r0] \n\
-    movs r3, #0xfc \n\
-    lsl r3, r3, #6 \n\
-lbl_0807ee50: \n\
-    add r1, r1, r3 \n\
-lbl_0807ee52: \n\
-    ldr r2, lbl_0807ee68 @ =0x0600e000 \n\
-lbl_0807ee54: \n\
-    movs r3, #0xc0 \n\
-    lsl r3, r3, #2 \n\
-    movs r0, #0x10 \n\
-    str r0, [sp] \n\
-    movs r0, #3 \n\
-    bl DmaTransfer \n\
-    b lbl_0807eec8 \n\
-    .align 2, 0 \n\
-lbl_0807ee64: .4byte sEwramPointer \n\
-lbl_0807ee68: .4byte 0x0600e000 \n\
-lbl_0807ee6c: \n\
-    ldr r0, lbl_0807ee90 @ =sNonGameplayRamPointer \n\
-    ldr r2, [r0] \n\
-    add r0, r2, #0 \n\
-    add r0, #0xbf \n\
-    ldrb r1, [r0] \n\
-    movs r0, #0x10 \n\
-    and r0, r1 \n\
-    cmp r0, #0 \n\
-    beq lbl_0807eec6 \n\
-    ldrh r0, [r2, #0x1e] \n\
-    strh r0, [r2, #4] \n\
-    ldrh r1, [r2] \n\
-    movs r3, #0x80 \n\
-    lsl r3, r3, #1 \n\
-    add r0, r3, #0 \n\
-lbl_0807ee8a: \n\
-    orr r0, r1 \n\
-    strh r0, [r2] \n\
-    b lbl_0807eec8 \n\
-    .align 2, 0 \n\
-lbl_0807ee90: .4byte sNonGameplayRamPointer \n\
-lbl_0807ee94: \n\
-    movs r0, #0xff \n\
-    lsl r0, r0, #1 \n\
-    bl SoundPlay \n\
-    ldr r0, lbl_0807eeb0 @ =sNonGameplayRamPointer \n\
-    ldr r1, [r0] \n\
-    ldrh r2, [r1] \n\
-    ldr r0, lbl_0807eeb4 @ =0x0000feff \n\
-    and r0, r2 \n\
-    strh r0, [r1] \n\
-    add r1, #0xbe \n\
-    movs r0, #0x27 \n\
-    strb r0, [r1] \n\
-    b lbl_0807eec8 \n\
-    .align 2, 0 \n\
-lbl_0807eeb0: .4byte sNonGameplayRamPointer \n\
-lbl_0807eeb4: .4byte 0x0000feff \n\
-lbl_0807eeb8: \n\
-    ldr r0, lbl_0807eed8 @ =sNonGameplayRamPointer \n\
-    ldr r0, [r0] \n\
-    add r0, #0xbe \n\
-    ldrb r0, [r0] \n\
-    movs r6, #1 \n\
-    cmp r0, #0 \n\
-    beq lbl_0807eec8 \n\
-lbl_0807eec6: \n\
-    movs r6, #0 \n\
-lbl_0807eec8: \n\
-    add r0, r6, #0 \n\
-    add sp, #4 \n\
-    pop {r3} \n\
-    mov r8, r3 \n\
-    pop {r4, r5, r6, r7} \n\
-    pop {r1} \n\
-    bx r1 \n\
-    .align 2, 0 \n\
-lbl_0807eed8: .4byte sNonGameplayRamPointer \n\
-    ");
-}
-#endif
 
 /**
  * @brief 7eedc | a0 | To document
