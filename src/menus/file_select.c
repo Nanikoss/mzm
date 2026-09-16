@@ -1163,7 +1163,6 @@ static void FileSelectFileCopyChooseBaseDestinationFile(void)
     FILE_SELECT_DATA.currentFile = file;
 }
 
-#ifdef NON_MATCHING
 u32 FileSelectCopyFileHandler(void)
 {
     u32 ended;
